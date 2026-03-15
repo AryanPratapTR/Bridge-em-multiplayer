@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Bridge-Em</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #574fd6;
+            --primary-light: #ede9ff;
+            --secondary: #e05070;
+            --secondary-light: #fde8ed;
+            --accent: #3aaa6e;
+            --accent-light: #e6f7ee;
+            --accent2: #e8a020;
+            --accent2-light: #fef3dc;
+            --bg: #f5f4f0;
+            --bg2: #ececea;
+            --card: #ffffff;
+            --card2: #f0eeeb;
+            --border: #d9d6cf;
+            --text: #1a1a1a;
+            --text-muted: #6b6b6b;
+            --success: #3aaa6e;
+            --error: #e05070;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .app {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 460px;
+            animation: fadeSlideIn 0.35s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            border: 1.5px solid var(--border);
+            width: 100%;
+            padding: 24px 22px;
+            margin-bottom: 14px;
+        }
+
+        /* ── NAYRA MASCOT ── */
+        .mascot-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 6px;
+            position: relative;
+        }
+
+        .mascot-wrap svg {
+            transition: transform 0.3s ease;
+        }
+
+        .mascot-wrap svg:hover {
+            transform: scale(1.04) rotate(-2deg);
+        }
+
+        /* Nayra dialogue bubble */
+        .nayra-bubble {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background: #fff;
+            border: 2px solid var(--primary);
+            border-radius: 18px;
+            padding: 14px 18px;
+            max-width: 240px;
+            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.15);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            animation: popIn 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .nayra-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--primary);
+        }
+
+        .nayra-bubble.show {
+            display: block;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .nayra-name {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        /* ── LOGO ── */
+        .logo {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .logo-title {
+            font-size: 2.1rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: var(--primary);
+            line-height: 1.1;
+        }
+
+        .logo-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            margin-top: 3px;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            padding: 12px 24px;
+            transition: all 0.15s ease;
+            letter-spacing: 0.2px;
+            width: 100%;
+            margin-bottom: 9px;
+        }
+
+        .btn:hover {
+            filter: brightness(0.95);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: 2px solid var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: #fff;
+            border: 2px solid #c0405a;
+        }
+
+        .btn-success {
+            background: var(--accent);
+            color: #fff;
+            border: 2px solid #2d8a58;
+        }
+
+        .btn-ghost {
+            background: var(--card2);
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            color: var(--text);
+            background: var(--bg2);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 9px;
+            width: 100%;
+        }
+
+        .btn-row .btn {
+            margin-bottom: 0;
+        }
+
+        /* ── INPUTS ── */
+        .input-group {
+            width: 100%;
+            margin-bottom: 11px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 5px;
+        }
+
+        .input {
+            width: 100%;
+            background: var(--card2);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 11px 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+            background: #fff;
+        }
+
+        .input::placeholder {
+            color: #b0aea8;
+            font-weight: 600;
+        }
+
+        /* ── ROOM CODE BADGE ── */
+        .room-code-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-light);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 9px 16px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: var(--primary);
+            margin-bottom: 7px;
+        }
+
+        .room-code-label {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 5px;
+        }
+
+        /* ── HUD ── */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 14px;
+            gap: 10px;
+        }
+
+        .hud-chip {
+            background: var(--card);
+            border-radius: 50px;
+            padding: 7px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1.5px solid var(--border);
+            min-width: 76px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .hud-chip-label {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .hud-chip-val {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .hud-chip-val.accent {
+            color: var(--accent2);
+        }
+
+        /* ── LETTER TILES ── */
+        .tiles-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 18px;
+        }
+
+        .letter-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 82px;
+            height: 82px;
+            border-radius: 14px;
+            font-size: 2.3rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            border: 2px solid transparent;
+            box-shadow: var(--shadow-card);
+        }
+
+        .tile-start {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .tile-end {
+            background: var(--secondary-light);
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .tile-label {
+            font-size: 0.58rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .tile-letter {
+            line-height: 1;
+        }
+
+        .tile-arrow {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* ── TIMER ── */
+        .timer-wrap {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .timer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 7px;
+        }
+
+        .timer-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .timer-num {
+            font-size: 0.9rem;
+            font-weight: 900;
+            color: var(--accent2);
+        }
+
+        .timer-track {
+            width: 100%;
+            height: 7px;
+            background: var(--bg2);
+            border-radius: 50px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .timer-fill {
+            height: 100%;
+            border-radius: 50px;
+            background: var(--accent);
+            transition: width 1s linear, background 0.5s;
+        }
+
+        .timer-fill.warning {
+            background: var(--accent2);
+        }
+
+        .timer-fill.danger {
+            background: var(--secondary);
+        }
+
+        /* ── WORD INPUT ROW ── */
+        .word-input-row {
+            display: flex;
+            gap: 9px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .word-input-row .input {
+            flex: 1;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .go-btn {
+            background: var(--primary);
+            color: #fff;
+            border: 2px solid var(--primary-dark);
+            border-radius: var(--radius-sm);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 0.95rem;
+            padding: 0 20px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .go-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .go-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ── FEEDBACK ── */
+        .feedback {
+            width: 100%;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            padding: 9px 14px;
+            text-align: center;
+            transition: all 0.22s;
+            opacity: 0;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        .feedback.correct {
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1.5px solid #b2dfc8;
+        }
+
+        .feedback.wrong {
+            background: var(--secondary-light);
+            color: var(--secondary);
+            border: 1.5px solid #f5bfca;
+        }
+
+        .feedback.info {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1.5px solid #c8c2f5;
+        }
+
+        /* ── USED WORDS ── */
+        .used-section {
+            width: 100%;
+        }
+
+        .used-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 7px;
+        }
+
+        .used-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-height: 78px;
+            overflow-y: auto;
+        }
+
+        .used-chip {
+            background: var(--card2);
+            border-radius: 50px;
+            padding: 3px 11px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .used-chip.correct-chip {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-color: #b2dfc8;
+        }
+
+        /* ── SCOREBOARD ── */
+        .scoreboard {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .scoreboard-title {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 7px;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card2);
+            border-radius: var(--radius-sm);
+            padding: 9px 13px;
+            margin-bottom: 5px;
+            border: 1.5px solid var(--border);
+            transition: border-color 0.2s;
+        }
+
+        .player-row.me {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .player-row.winner-row {
+            border-color: var(--accent2);
+            background: var(--accent2-light);
+        }
+
+        .player-name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .player-score {
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: var(--accent2);
+        }
+
+        .badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .badge-host {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-you {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        /* ── GAME OVER ── */
+        .go-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 3px;
+        }
+
+        .go-sub {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .score-big {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--accent2);
+            text-align: center;
+            line-height: 1;
+            margin: 7px 0;
+        }
+
+        .stars-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            font-size: 1.4rem;
+            margin: 7px 0 11px;
+        }
+
+        .hint-box {
+            width: 100%;
+            background: var(--primary-light);
+            border: 1.5px solid #c8c2f5;
+            border-radius: var(--radius-sm);
+            padding: 11px 14px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .hint-box-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 3px;
+        }
+
+        .hint-word {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            margin: 14px 0;
+        }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-size: 1rem;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        /* ── STATUS MSG ── */
+        .status-msg {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 9px;
+        }
+
+        .status-msg.error {
+            color: var(--error);
+        }
+
+        .status-msg.success {
+            color: var(--success);
+        }
+
+        /* ── WAITING ANIMATION ── */
+        .waiting-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% {
+                content: '';
+            }
+
+            33% {
+                content: '.';
+            }
+
+            66% {
+                content: '..';
+            }
+
+            100% {
+                content: '...';
+            }
+        }
+
+        /* ── PULSE ── */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2.2s ease-in-out infinite;
+        }
+
+        /* ── TICKER ── */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 7px 0;
+            margin-top: 7px;
+        }
+
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
+            animation: ticker 22s linear infinite;
+            padding-left: 100%;
+        }
+
+        @keyframes ticker {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 400px) {
+            .logo-title {
+                font-size: 1.8rem;
+            }
+
+            .letter-tile {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 18px 14px;
+            }
+
+            .btn {
+                padding: 11px 18px;
+            }
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Nayra floating dialogue bubble -->
+    <div class="nayra-bubble" id="nayraDialogue">
+        <div class="nayra-name">Nayra says</div>
+        <div id="nayraText">Hi there!</div>
+    </div>
+
+    <div class="app">
+
+        <!-- ═══════════════ LOBBY SCREEN ═══════════════ -->
+        <div class="screen active" id="lobbyScreen">
+
+            <div class="mascot-wrap pulse" id="nayraLobby" onclick="showNayraDialogue(event)">
+                <!-- Nayra SVG - girl with long hair, friendly face -->
+                <svg width="110" height="132" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="skinG" cx="50%" cy="40%" r="60%">
+                            <stop offset="0%" stop-color="#ffe0c8" />
+                            <stop offset="100%" stop-color="#f5c8a8" />
+                        </radialGradient>
+                        <radialGradient id="eyeG" cx="35%" cy="35%" r="60%">
+                            <stop offset="0%" stop-color="#5a3e8a" />
+                            <stop offset="100%" stop-color="#3a2060" />
+                        </radialGradient>
+                        <linearGradient id="hairG" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#3d2000" />
+                            <stop offset="100%" stop-color="#6b3800" />
+                        </linearGradient>
+                        <linearGradient id="dressG" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#a78bfa" />
+                            <stop offset="100%" stop-color="#7c3aed" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Shadow -->
+                    <ellipse cx="55" cy="128" rx="26" ry="4" fill="rgba(0,0,0,0.10)" />
+                    <!-- Hair back -->
+                    <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG)" />
+                    <!-- Long hair sides -->
+                    <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#hairG)" />
+                    <rect x="82" y="52" width="14" height="48" rx="7" fill="url(#hairG)" />
+                    <!-- Dress / Body -->
+                    <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
+                        fill="url(#dressG)" />
+                    <!-- Dress collar detail -->
+                    <path d="M44 88 Q55 95 66 88" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="none" />
+                    <!-- Neck -->
+                    <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG)" />
+                    <!-- Head -->
+                    <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG)" />
+                    <!-- Hair top / fringe -->
+                    <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG)" />
+                    <!-- Hair parting detail -->
+                    <path d="M55 18 Q57 30 55 36" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none" />
+                    <!-- Ears -->
+                    <ellipse cx="23" cy="52" rx="6" ry="8" fill="url(#skinG)" />
+                    <ellipse cx="87" cy="52" rx="6" ry="8" fill="url(#skinG)" />
+                    <ellipse cx="23" cy="52" rx="3.5" ry="5" fill="#f0b898" opacity="0.5" />
+                    <ellipse cx="87" cy="52" rx="3.5" ry="5" fill="#f0b898" opacity="0.5" />
+                    <!-- Small earrings -->
+                    <circle cx="23" cy="57" r="2.5" fill="#a78bfa" />
+                    <circle cx="87" cy="57" r="2.5" fill="#a78bfa" />
+                    <!-- Eyes whites -->
+                    <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
+                    <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
+                    <!-- Iris -->
+                    <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG)" />
+                    <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG)" />
+                    <!-- Pupils -->
+                    <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                    <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                    <!-- Eye shine -->
+                    <ellipse cx="45" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
+                    <ellipse cx="69" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
+                    <!-- Lashes -->
+                    <path d="M35 42 Q43 38 51 41" stroke="#3d2000" stroke-width="2" fill="none"
+                        stroke-linecap="round" />
+                    <path d="M59 41 Q67 38 75 42" stroke="#3d2000" stroke-width="2" fill="none"
+                        stroke-linecap="round" />
+                    <!-- Eyebrows -->
+                    <path d="M36 41 Q43 37 50 40" stroke="#5a3200" stroke-width="2.2" fill="none"
+                        stroke-linecap="round" />
+                    <path d="M60 40 Q67 37 74 41" stroke="#5a3200" stroke-width="2.2" fill="none"
+                        stroke-linecap="round" />
+                    <!-- Blush -->
+                    <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                    <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                    <!-- Nose -->
+                    <path d="M52 58 Q55 62 58 58" stroke="#d09070" stroke-width="1.5" fill="none"
+                        stroke-linecap="round" />
+                    <!-- Smile -->
+                    <path d="M45 66 Q55 75 65 66" stroke="#c06050" stroke-width="2.5" fill="none"
+                        stroke-linecap="round" />
+                    <!-- Teeth hint -->
+                    <path d="M48 67 Q55 72 62 67" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"
+                        opacity="0.6" />
+                    <!-- Arms -->
+                    <ellipse cx="19" cy="100" rx="9" ry="15" fill="url(#skinG)" transform="rotate(-8 19 100)" />
+                    <ellipse cx="91" cy="100" rx="9" ry="15" fill="url(#skinG)" transform="rotate(8 91 100)" />
+                    <!-- Hands -->
+                    <circle cx="16" cy="114" r="7" fill="url(#skinG)" />
+                    <circle cx="94" cy="114" r="7" fill="url(#skinG)" />
+                    <!-- Legs -->
+                    <rect x="37" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
+                    <rect x="60" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
+                    <!-- Shoes -->
+                    <ellipse cx="43" cy="130" rx="8" ry="4" fill="#3d2000" />
+                    <ellipse cx="66" cy="130" rx="8" ry="4" fill="#3d2000" />
+                </svg>
+            </div>
+
+            <div class="logo">
+                <div class="logo-title">Bridge-Em</div>
+                <div class="logo-sub">Bridge the gap between two letters!</div>
+            </div>
+
+            <div class="card" style="margin-top:18px;">
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="showSection('createSection')">✦ Create Room</button>
+                    <button class="btn btn-secondary" onclick="showSection('joinSection')">→ Join Room</button>
+                </div>
+
+                <!-- Create Section -->
+                <div id="createSection" style="display:none;">
+                    <div class="divider"></div>
+                    <div class="section-title">Create a Room</div>
+                    <div class="input-group">
+                        <label>Your Name</label>
+                        <input class="input" id="createName" placeholder="e.g. Alex" maxlength="16" />
+                    </div>
+                    <div class="input-group">
+                        <label>Number of Rounds</label>
+                        <input class="input" id="totalRounds" type="number" placeholder="Default: 10" min="1"
+                            max="30" />
+                    </div>
+                    <button class="btn btn-success" onclick="createRoom()">Create &amp; Start</button>
+                    <div class="status-msg" id="createStatus"></div>
+                </div>
+
+                <!-- Join Section -->
+                <div id="joinSection" style="display:none;">
+                    <div class="divider"></div>
+                    <div class="section-title">Join a Room</div>
+                    <div class="input-group">
+                        <label>Room Code</label>
+                        <input class="input" id="joinRoomCode" placeholder="e.g. AB12CD" maxlength="6"
+                            style="text-transform:uppercase; letter-spacing:4px; font-size:1.1rem;" />
+                    </div>
+                    <div class="input-group">
+                        <label>Your Name</label>
+                        <input class="input" id="joinName" placeholder="e.g. Jordan" maxlength="16" />
+                    </div>
+                    <button class="btn btn-primary" onclick="joinRoom()">→ Join Game</button>
+                    <div class="status-msg" id="joinStatus"></div>
+                </div>
+            </div>
+
+            <div class="ticker-wrap">
+                <span class="ticker">⭐ WELCOME TO BRIDGE-EM &nbsp;&nbsp; FIND WORDS THAT START AND END WITH THE GIVEN
+                    LETTERS &nbsp;&nbsp; FASTEST FINGER WINS &nbsp;&nbsp; GOOD LUCK! ⭐</span>
+            </div>
+        </div>
+
+        <!-- ═══════════════ WAITING ROOM SCREEN ═══════════════ -->
+        <div class="screen" id="waitingScreen">
+            <div class="mascot-wrap" id="nayraWaiting" onclick="showNayraDialogue(event)">
+                <svg width="80" height="96" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="skinG2" cx="50%" cy="40%" r="60%">
+                            <stop offset="0%" stop-color="#ffe0c8" />
+                            <stop offset="100%" stop-color="#f5c8a8" />
+                        </radialGradient>
+                        <radialGradient id="eyeG2" cx="35%" cy="35%" r="60%">
+                            <stop offset="0%" stop-color="#5a3e8a" />
+                            <stop offset="100%" stop-color="#3a2060" />
+                        </radialGradient>
+                        <linearGradient id="hairG2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#3d2000" />
+                            <stop offset="100%" stop-color="#6b3800" />
+                        </linearGradient>
+                        <linearGradient id="dressG2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#a78bfa" />
+                            <stop offset="100%" stop-color="#7c3aed" />
+                        </linearGradient>
+                    </defs>
+                    <ellipse cx="55" cy="128" rx="26" ry="4" fill="rgba(0,0,0,0.10)" />
+                    <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG2)" />
+                    <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#hairG2)" />
+                    <rect x="82" y="52" width="14" height="48" rx="7" fill="url(#hairG2)" />
+                    <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
+                        fill="url(#dressG2)" />
+                    <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG2)" />
+                    <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG2)" />
+                    <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG2)" />
+                    <ellipse cx="23" cy="52" rx="6" ry="8" fill="url(#skinG2)" />
+                    <ellipse cx="87" cy="52" rx="6" ry="8" fill="url(#skinG2)" />
+                    <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
+                    <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
+                    <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG2)" />
+                    <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG2)" />
+                    <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                    <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                    <ellipse cx="45" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
+                    <ellipse cx="69" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
+                    <path d="M36 41 Q43 37 50 40" stroke="#5a3200" stroke-width="2.2" fill="none"
+                        stroke-linecap="round" />
+                    <path d="M60 40 Q67 37 74 41" stroke="#5a3200" stroke-width="2.2" fill="none"
+                        stroke-linecap="round" />
+                    <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                    <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                    <!-- Waiting / curious expression -->
+                    <path d="M46 67 Q55 73 64 67" stroke="#c06050" stroke-width="2.5" fill="none"
+                        stroke-linecap="round" />
+                    <ellipse cx="19" cy="100" rx="9" ry="15" fill="url(#skinG2)" transform="rotate(-8 19 100)" />
+                    <ellipse cx="91" cy="100" rx="9" ry="15" fill="url(#skinG2)" transform="rotate(8 91 100)" />
+                    <rect x="37" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
+                    <rect x="60" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
+                </svg>
+            </div>
+
+            <div class="card" style="margin-top:10px; text-align:center;">
+                <div class="section-title">Room Created! 🎉</div>
+                <div class="room-code-label">Share this code with friends</div>
+                <div class="room-code-badge" id="roomCodeDisplay">------</div>
+                <div class="status-msg waiting-dots" id="waitingMsg">Waiting for players</div>
+                <div class="divider"></div>
+                <div class="scoreboard-title">Players in Room</div>
+                <div id="waitingPlayersList"></div>
+                <div class="divider"></div>
+                <button class="btn btn-success" id="startGameBtn" onclick="hostStartGame()" style="display:none;">
+                    ▶ Start Game
+                </button>
+                <div class="status-msg" id="startHint">Need at least 2 players to start</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ GAME SCREEN ═══════════════ -->
+        <div class="screen" id="gameScreen">
+
+            <!-- HUD -->
+            <div class="hud">
+                <div class="hud-chip">
+                    <span class="hud-chip-label">Score</span>
+                    <span class="hud-chip-val accent" id="scoreDisplay">0</span>
+                </div>
+                <!-- Nayra mini in HUD -->
+                <div id="nayraGame" onclick="showNayraDialogue(event)" style="cursor:pointer;">
+                    <svg width="46" height="54" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="skinG3" cx="50%" cy="40%" r="60%">
+                                <stop offset="0%" stop-color="#ffe0c8" />
+                                <stop offset="100%" stop-color="#f5c8a8" />
+                            </radialGradient>
+                            <radialGradient id="eyeG3" cx="35%" cy="35%" r="60%">
+                                <stop offset="0%" stop-color="#5a3e8a" />
+                                <stop offset="100%" stop-color="#3a2060" />
+                            </radialGradient>
+                            <linearGradient id="hairG3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#3d2000" />
+                                <stop offset="100%" stop-color="#6b3800" />
+                            </linearGradient>
+                            <linearGradient id="dressG3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#a78bfa" />
+                                <stop offset="100%" stop-color="#7c3aed" />
+                            </linearGradient>
+                        </defs>
+                        <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG3)" />
+                        <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
+                            fill="url(#dressG3)" />
+                        <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG3)" />
+                        <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG3)" />
+                        <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG3)" />
+                        <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
+                        <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
+                        <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG3)" />
+                        <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG3)" />
+                        <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                        <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                        <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                        <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                        <path d="M45 66 Q55 75 65 66" stroke="#c06050" stroke-width="2.5" fill="none"
+                            stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="hud-chip">
+                    <span class="hud-chip-label">Round</span>
+                    <span class="hud-chip-val" id="roundDisplay">1</span>
+                </div>
+            </div>
+
+            <!-- Letter Tiles -->
+            <div class="tiles-row">
+                <div class="letter-tile tile-start" id="startTile">
+                    <span class="tile-letter" id="startLetter">A</span>
+                    <span class="tile-label">Start</span>
+                </div>
+                <div class="tile-arrow">⟶</div>
+                <div class="letter-tile tile-end" id="endTile">
+                    <span class="tile-letter" id="endLetter">E</span>
+                    <span class="tile-label">End</span>
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <div class="timer-wrap">
+                <div class="timer-top">
+                    <span class="timer-label">Time Remaining</span>
+                    <span class="timer-num" id="timerNum">15</span>
+                </div>
+                <div class="timer-track">
+                    <div class="timer-fill" id="timerBar" style="width:100%"></div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="word-input-row">
+                <input class="input" id="wordInput" placeholder="Type your word..." autocomplete="off" autocorrect="off"
+                    autocapitalize="characters" spellcheck="false" />
+                <button class="go-btn" id="submitBtn" onclick="submitWord()">GO</button>
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback" id="feedback"></div>
+
+            <!-- Scoreboard (multiplayer) -->
+            <div class="scoreboard" id="liveScoreboard" style="display:none;">
+                <div class="scoreboard-title">Live Scores</div>
+                <div id="liveScoresList"></div>
+            </div>
+
+            <!-- Used Words -->
+            <div class="used-section">
+                <div class="used-label">Used Words</div>
+                <div class="used-chips" id="usedWords"></div>
+            </div>
+
+        </div>
+
+        <!-- ═══════════════ GAME OVER SCREEN ═══════════════ -->
+        <div class="screen" id="gameOverScreen">
+            <div class="mascot-wrap" id="nayraGameOver" onclick="showNayraDialogue(event)">
+                <svg width="100" height="120" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="skinG4" cx="50%" cy="40%" r="60%">
+                            <stop offset="0%" stop-color="#ffe0c8" />
+                            <stop offset="100%" stop-color="#f5c8a8" />
+                        </radialGradient>
+                        <radialGradient id="eyeG4" cx="35%" cy="35%" r="60%">
+                            <stop offset="0%" stop-color="#5a3e8a" />
+                            <stop offset="100%" stop-color="#3a2060" />
+                        </radialGradient>
+                        <linearGradient id="hairG4" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#3d2000" />
+                            <stop offset="100%" stop-color="#6b3800" />
+                        </linearGradient>
+                        <linearGradient id="dressG4" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#a78bfa" />
+                            <stop offset="100%" stop-color="#7c3aed" />
+                        </linearGradient>
+                    </defs>
+                    <ellipse cx="55" cy="128" rx="26" ry="4" fill="rgba(0,0,0,0.10)" />
+                    <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG4)" />
+                    <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#hairG4)" />
+                    <rect x="82" y="52" width="14" height="48" rx="7" fill="url(#hairG4)" />
+                    <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
+                        fill="url(#dressG4)" />
+                    <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG4)" />
+                    <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG4)" />
+                    <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG4)" />
+                    <ellipse cx="23" cy="52" rx="6" ry="8" fill="url(#skinG4)" />
+                    <ellipse cx="87" cy="52" rx="6" ry="8" fill="url(#skinG4)" />
+                    <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
+                    <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
+                    <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG4)" />
+                    <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG4)" />
+                    <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                    <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
+                    <ellipse cx="45" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
+                    <ellipse cx="69" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
+                    <path d="M36 41 Q43 37 50 40" stroke="#5a3200" stroke-width="2.2" fill="none"
+                        stroke-linecap="round" />
+                    <path d="M60 40 Q67 37 74 41" stroke="#5a3200" stroke-width="2.2" fill="none"
+                        stroke-linecap="round" />
+                    <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                    <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
+                    <!-- Expression set by JS -->
+                    <path id="goMouth" d="M45 66 Q55 75 65 66" stroke="#c06050" stroke-width="2.5" fill="none"
+                        stroke-linecap="round" />
+                    <ellipse cx="19" cy="100" rx="9" ry="15" fill="url(#skinG4)" transform="rotate(-8 19 100)" />
+                    <ellipse cx="91" cy="100" rx="9" ry="15" fill="url(#skinG4)" transform="rotate(8 91 100)" />
+                    <rect x="37" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
+                    <rect x="60" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
+                    <ellipse cx="43" cy="130" rx="8" ry="4" fill="#3d2000" />
+                    <ellipse cx="66" cy="130" rx="8" ry="4" fill="#3d2000" />
+                </svg>
+            </div>
+
+            <div class="card">
+                <div class="go-title" id="goTitle">Game Over!</div>
+                <div class="go-sub" id="goSub">Here's how you did</div>
+                <div class="score-big" id="finalScore">0</div>
+                <div class="stars-row" id="starRating">⭐⭐⭐</div>
+
+                <div id="finalScoreboard" style="display:none;">
+                    <div class="divider"></div>
+                    <div class="scoreboard-title">Final Standings</div>
+                    <div id="finalScoresList"></div>
+                </div>
+
+                <div class="hint-box" id="hintBox" style="display:none;">
+                    <div class="hint-box-label">💡 One possible answer was</div>
+                    <div class="hint-word" id="hintWord"></div>
+                </div>
+
+                <div class="divider"></div>
+                <button class="btn btn-success" onclick="playAgain()">▶ Play Again</button>
+                <button class="btn btn-ghost" onclick="goToLobby()">↩ Main Menu</button>
+            </div>
+
+            <div class="ticker-wrap">
+                <span class="ticker">⭐ THANKS FOR PLAYING BRIDGE-EM &nbsp;&nbsp; CAN YOU BEAT YOUR SCORE? &nbsp;&nbsp;
+                    CHALLENGE YOUR FRIENDS &nbsp;&nbsp; KEEP BRIDGING! ⭐</span>
+            </div>
+        </div>
+
+    </div><!-- /app -->
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        // ═══════════════════════════════════════════════
+        //  NAYRA DIALOGUE SYSTEM
+        // ═══════════════════════════════════════════════
+        const nayraDialogues = {
+            lobby: [
+                "Hi! I'm Nayra 👋 Let's play Bridge-Em!",
+                "Think fast — words are waiting for you!",
+                "Create a room and challenge your friends!",
+                "I believe in you. Now go bridge those letters! ✨",
+                "The faster you think, the more you win!",
+                "Every word counts. Ready to play?"
+            ],
+            waiting: [
+                "Waiting for friends? Good things take time! ⏳",
+                "Tell your friends the room code!",
+                "I'm excited to see who joins next!",
+                "The more players, the more fun!",
+                "Patience is a virtue... but hurry up! 😄"
+            ],
+            game: [
+                "You can do this! Think of a word!",
+                "Come on, type faster! ⚡",
+                "I know you have a word in mind!",
+                "Don't overthink it — go with your gut!",
+                "Every second counts!",
+                "You've got this! I believe in you! 💪",
+                "Words, words, words — pick one!",
+                "Tick tock... the clock is ticking! ⏰"
+            ],
+            gameOver: [
+                "Great game! You were amazing! 🎉",
+                "Win or lose, you played brilliantly!",
+                "Ready for a rematch? Let's go again!",
+                "That was so fun to watch! Play again?",
+                "You're getting better every round! 📈",
+                "I'm proud of you no matter the score!"
+            ]
+        };
+
+        let nayraTimeout = null;
+
+        function showNayraDialogue(event, context) {
+            const bubble = document.getElementById('nayraDialogue');
+            const textEl = document.getElementById('nayraText');
+
+            // Pick context based on active screen if not provided
+            if (!context) {
+                if (document.getElementById('lobbyScreen').classList.contains('active')) context = 'lobby';
+                else if (document.getElementById('waitingScreen').classList.contains('active')) context = 'waiting';
+                else if (document.getElementById('gameScreen').classList.contains('active')) context = 'game';
+                else context = 'gameOver';
+            }
+
+            const lines = nayraDialogues[context] || nayraDialogues.lobby;
+            textEl.textContent = lines[Math.floor(Math.random() * lines.length)];
+
+            // Position near click / mascot
+            const x = event ? event.clientX : window.innerWidth / 2;
+            const y = event ? event.clientY : 120;
+
+            bubble.style.left = Math.min(x - 120, window.innerWidth - 260) + 'px';
+            bubble.style.top = Math.max(y - 90, 10) + 'px';
+            bubble.classList.add('show');
+
+            clearTimeout(nayraTimeout);
+            nayraTimeout = setTimeout(() => bubble.classList.remove('show'), 3200);
+        }
+
+        // Auto show Nayra dialogue on screen transitions
+        function showNayraAuto(context) {
+            setTimeout(() => {
+                const bubble = document.getElementById('nayraDialogue');
+                const textEl = document.getElementById('nayraText');
+                const lines = nayraDialogues[context] || nayraDialogues.lobby;
+                textEl.textContent = lines[Math.floor(Math.random() * lines.length)];
+                bubble.style.left = (window.innerWidth / 2 - 120) + 'px';
+                bubble.style.top = '120px';
+                bubble.classList.add('show');
+                clearTimeout(nayraTimeout);
+                nayraTimeout = setTimeout(() => bubble.classList.remove('show'), 3200);
+            }, 600);
+        }
+
+        // ═══════════════════════════════════════════════
+        //  UTILITIES
+        // ═══════════════════════════════════════════════
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0, 0);
+            // Trigger Nayra
+            const ctxMap = { lobbyScreen: 'lobby', waitingScreen: 'waiting', gameScreen: 'game', gameOverScreen: 'gameOver' };
+            if (ctxMap[id]) showNayraAuto(ctxMap[id]);
+        }
+
+        function showSection(id) {
+            ['createSection', 'joinSection'].forEach(s => {
+                document.getElementById(s).style.display = s === id ? 'block' : 'none';
+            });
+        }
+
+        function setStatus(elId, msg, type = '') {
+            const el = document.getElementById(elId);
+            el.textContent = msg;
+            el.className = 'status-msg' + (type ? ' ' + type : '');
+        }
+
+        function showFeedback(msg, type) {
+            const el = document.getElementById('feedback');
+            el.textContent = msg;
+            el.className = `feedback show ${type}`;
+            clearTimeout(el._t);
+            el._t = setTimeout(() => el.classList.remove('show'), 2200);
+        }
+
+        // ═══════════════════════════════════════════════
+        //  STATE
+        // ═══════════════════════════════════════════════
+        let socket = null;
+        let currentRoomId = null;
+        let myName = '';
+        let myId = null;
+        let isHost = false;
+        let roundTimer = null;
+        let currentTimerMax = 15;
+        let usedWordsSet = new Set();
+        let myScore = 0;
+        let currentRound = 0;
+        let totalRoundsCount = 10;
+
+        // ═══════════════════════════════════════════════
+        //  SOCKET SETUP
+        // ═══════════════════════════════════════════════
+        function initSocket() {
+            if (socket) socket.disconnect();
+            socket = io();
+            myId = null;
+
+            socket.on('connect', () => { myId = socket.id; });
+
+            socket.on('error_msg', msg => {
+                setStatus('createStatus', msg, 'error');
+                setStatus('joinStatus', msg, 'error');
+            });
+
+            socket.on('room_created', data => {
+                currentRoomId = data.roomId;
+                isHost = true;
+                document.getElementById('roomCodeDisplay').textContent = data.roomId;
+                showScreen('waitingScreen');
+                updateWaitingPlayers(data.room.players);
+            });
+
+            socket.on('room_joined', data => {
+                currentRoomId = data.roomId;
+                isHost = false;
+                showScreen('waitingScreen');
+                document.getElementById('roomCodeDisplay').textContent = data.roomId;
+                updateWaitingPlayers(data.room.players);
+                setStatus('waitingMsg', 'Waiting for host to start');
+                document.getElementById('startHint').textContent = 'Waiting for host...';
+            });
+
+            socket.on('player_joined', data => {
+                updateWaitingPlayers(data.room.players);
+                checkStartButton(data.room.players);
+            });
+
+            socket.on('player_left', data => {
+                updateWaitingPlayers(data.room.players);
+                checkStartButton(data.room.players);
+            });
+
+            socket.on('game_start', data => {
+                totalRoundsCount = data.totalRounds || 10;
+                myScore = 0;
+                usedWordsSet = new Set();
+                document.getElementById('scoreDisplay').textContent = '0';
+                document.getElementById('liveScoreboard').style.display = 'block';
+                showScreen('gameScreen');
+                setupRound(data);
+            });
+
+            socket.on('next_round', data => { setupRound(data); });
+
+            socket.on('word_result', data => {
+                if (data.playerId === myId) {
+                    if (data.valid) {
+                        showFeedback(`✓ "${data.word}" — +${data.points} pts!`, 'correct');
+                        myScore += data.points;
+                        document.getElementById('scoreDisplay').textContent = myScore;
+                        addUsedChip(data.word, true);
+                    } else {
+                        showFeedback(data.reason || '✗ Invalid word', 'wrong');
+                        addUsedChip(data.word, false);
+                    }
+                }
+                if (data.scores) updateLiveScores(data.scores);
+            });
+
+            socket.on('round_won', data => {
+                clearRoundTimer();
+                showFeedback(`🏆 ${data.winnerName} got it with "${data.word}"!`, 'info');
+                if (data.scores) updateLiveScores(data.scores);
+                disableInput();
+            });
+
+            socket.on('round_timeout', data => {
+                clearRoundTimer();
+                showFeedback("⏰ Time's up!", 'wrong');
+                disableInput();
+            });
+
+            socket.on('game_over', data => {
+                clearRoundTimer();
+                showGameOver(data);
+            });
+        }
+
+        // ═══════════════════════════════════════════════
+        //  LOBBY ACTIONS
+        // ═══════════════════════════════════════════════
+        function createRoom() {
+            const name = document.getElementById('createName').value.trim();
+            const rounds = parseInt(document.getElementById('totalRounds').value);
+            if (!name) { setStatus('createStatus', 'Please enter your name', 'error'); return; }
+            myName = name;
+            initSocket();
+            socket.emit('create_room', {
+                playerName: name,
+                totalRounds: isNaN(rounds) ? 10 : Math.min(Math.max(rounds, 1), 30)
+            });
+        }
+
+        function joinRoom() {
+            const code = document.getElementById('joinRoomCode').value.trim().toUpperCase();
+            const name = document.getElementById('joinName').value.trim();
+            if (!code) { setStatus('joinStatus', 'Please enter a room code', 'error'); return; }
+            if (!name) { setStatus('joinStatus', 'Please enter your name', 'error'); return; }
+            myName = name;
+            initSocket();
+            socket.emit('join_room', { roomId: code, playerName: name });
+        }
+
+        function hostStartGame() {
+            if (!socket || !currentRoomId) return;
+            socket.emit('host_start', { roomId: currentRoomId });
+        }
+
+        // ═══════════════════════════════════════════════
+        //  WAITING ROOM
+        // ═══════════════════════════════════════════════
+        function updateWaitingPlayers(players) {
+            const list = document.getElementById('waitingPlayersList');
+            list.innerHTML = players.map((p, i) => `
+        <div class="player-row ${p.id === myId ? 'me' : ''}">
+          <span class="player-name">
+            ${p.name}
+            ${i === 0 ? '<span class="badge badge-host">Host</span>' : ''}
+            ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
+          </span>
+          <span style="font-size:0.82rem; color:var(--accent)">✓ Ready</span>
+        </div>
+      `).join('');
+        }
+
+        function checkStartButton(players) {
+            const btn = document.getElementById('startGameBtn');
+            const hint = document.getElementById('startHint');
+            if (isHost) {
+                if (players.length >= 2) {
+                    btn.style.display = 'flex';
+                    hint.textContent = `${players.length} player${players.length > 1 ? 's' : ''} ready — let's go!`;
+                    hint.className = 'status-msg success';
+                } else {
+                    btn.style.display = 'none';
+                    hint.textContent = 'Need at least 2 players to start';
+                    hint.className = 'status-msg';
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════
+        //  GAME ROUND
+        // ═══════════════════════════════════════════════
+        function setupRound(data) {
+            currentRound = data.roundNumber;
+            currentTimerMax = data.timeLimit || 15;
+            usedWordsSet = new Set();
+
+            document.getElementById('startLetter').textContent = data.pair.start;
+            document.getElementById('endLetter').textContent = data.pair.end;
+            document.getElementById('roundDisplay').textContent = `${data.roundNumber}/${totalRoundsCount}`;
+            document.getElementById('usedWords').innerHTML = '';
+            document.getElementById('wordInput').value = '';
+            document.getElementById('feedback').className = 'feedback';
+
+            enableInput();
+            startRoundTimer(currentTimerMax);
+        }
+
+        function startRoundTimer(seconds) {
+            clearRoundTimer();
+            let timeLeft = seconds;
+            const bar = document.getElementById('timerBar');
+            const num = document.getElementById('timerNum');
+
+            const tick = () => {
+                num.textContent = timeLeft;
+                const pct = (timeLeft / seconds) * 100;
+                bar.style.width = pct + '%';
+                bar.className = 'timer-fill' + (pct <= 30 ? ' danger' : pct <= 60 ? ' warning' : '');
+                if (timeLeft <= 0) { clearRoundTimer(); return; }
+                timeLeft--;
+                roundTimer = setTimeout(tick, 1000);
+            };
+            tick();
+        }
+
+        function clearRoundTimer() {
+            if (roundTimer) { clearTimeout(roundTimer); roundTimer = null; }
+        }
+
+        function enableInput() {
+            document.getElementById('wordInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('wordInput').focus();
+        }
+
+        function disableInput() {
+            document.getElementById('wordInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function addUsedChip(word, correct) {
+            if (usedWordsSet.has(word)) return;
+            usedWordsSet.add(word);
+            const chip = document.createElement('div');
+            chip.className = 'used-chip' + (correct ? ' correct-chip' : '');
+            chip.textContent = word.toUpperCase();
+            document.getElementById('usedWords').prepend(chip);
+        }
+
+        // ═══════════════════════════════════════════════
+        //  SUBMIT WORD
+        // ═══════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('wordInput').addEventListener('keydown', e => {
+                if (e.key === 'Enter') submitWord();
+            });
+            // Show Nayra greeting on load
+            showNayraAuto('lobby');
+        });
+
+        function submitWord() {
+            const input = document.getElementById('wordInput');
+            const word = input.value.trim().toLowerCase();
+            if (!word) return;
+            if (!socket || !currentRoomId) return;
+            input.value = '';
+            socket.emit('submit_word', { roomId: currentRoomId, word });
+        }
+
+        // ═══════════════════════════════════════════════
+        //  LIVE SCORES
+        // ═══════════════════════════════════════════════
+        function updateLiveScores(scores) {
+            const list = document.getElementById('liveScoresList');
+            const sorted = [...scores].sort((a, b) => b.score - a.score);
+            list.innerHTML = sorted.map((p, i) => `
+        <div class="player-row ${p.id === myId ? 'me' : ''}">
+          <span class="player-name">
+            ${i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : `${i + 1}. `}${p.name}
+            ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
+          </span>
+          <span class="player-score">${p.score}</span>
+        </div>
+      `).join('');
+        }
+
+        // ═══════════════════════════════════════════════
+        //  GAME OVER
+        // ═══════════════════════════════════════════════
+        function showGameOver(data) {
+            const myData = data.scores ? data.scores.find(p => p.id === myId) : null;
+            const finalScore = myData ? myData.score : myScore;
+            const winner = data.winner;
+            const iWon = winner && winner.id === myId;
+
+            document.getElementById('finalScore').textContent = finalScore;
+            document.getElementById('goTitle').textContent = iWon ? '🏆 You Win!' : 'Game Over!';
+            document.getElementById('goSub').textContent = iWon
+                ? 'Congratulations, you topped the leaderboard!'
+                : `${winner ? winner.name + ' wins this round!' : 'Thanks for playing!'}`;
+
+            const maxScore = totalRoundsCount * 100;
+            const pct = finalScore / maxScore;
+            document.getElementById('starRating').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
+
+            // Nayra expression
+            const mouth = document.getElementById('goMouth');
+            mouth.setAttribute('d', iWon ? 'M44 64 Q55 78 66 64' : 'M44 72 Q55 64 66 72');
+
+            if (data.scores && data.scores.length > 1) {
+                document.getElementById('finalScoreboard').style.display = 'block';
+                const sorted = [...data.scores].sort((a, b) => b.score - a.score);
+                document.getElementById('finalScoresList').innerHTML = sorted.map((p, i) => `
+          <div class="player-row ${p.id === myId ? 'me' : ''} ${i === 0 ? 'winner-row' : ''}">
+            <span class="player-name">
+              ${i === 0 ? '🏆 ' : `${i + 1}. `}${p.name}
+              ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
+            </span>
+            <span class="player-score">${p.score}</span>
+          </div>
+        `).join('');
+            }
+
+            if (data.hint) {
+                document.getElementById('hintBox').style.display = 'block';
+                document.getElementById('hintWord').textContent = data.hint.toUpperCase();
+            }
+
+            showScreen('gameOverScreen');
+        }
+
+        // ═══════════════════════════════════════════════
+        //  NAVIGATION
+        // ═══════════════════════════════════════════════
+        function playAgain() {
+            if (isHost && socket && currentRoomId) {
+                socket.emit('host_start', { roomId: currentRoomId });
+                showScreen('gameScreen');
+            } else {
+                goToLobby();
+            }
+        }
+
+        function goToLobby() {
+            if (socket) { socket.disconnect(); socket = null; }
+            currentRoomId = null;
+            isHost = false;
+            myScore = 0;
+            document.getElementById('createSection').style.display = 'none';
+            document.getElementById('joinSection').style.display = 'none';
+            document.getElementById('createStatus').textContent = '';
+            document.getElementById('joinStatus').textContent = '';
+            document.getElementById('finalScoreboard').style.display = 'none';
+            document.getElementById('hintBox').style.display = 'none';
+            document.getElementById('liveScoreboard').style.display = 'none';
+            showScreen('lobbyScreen');
+        }
+
+    </script>
+</body>
+
+</html>
