@@ -41,6 +41,30 @@ app.get('/{*path}', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+//  API WORD CACHE
+//  Stores words confirmed valid by the dictionary API this session
+//  so repeat words don't hit the API again
+// ═══════════════════════════════════════════════════════════════
+const apiWordCache = new Set();
+
+// Tracks players currently awaiting an API check
+// Prevents spam submissions while a check is in progress
+const pendingApiCheck = new Set();
+
+async function checkWordWithApi(word) {
+    try {
+        const fetch = (await import('node-fetch')).default;
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        return Array.isArray(data) && data.length > 0;
+    } catch (err) {
+        console.error(`[API] Dictionary check failed for "${word}":`, err.message);
+        return false;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  SOCKET EVENTS
 // ═══════════════════════════════════════════════════════════════
 io.on('connection', (socket) => {
@@ -99,7 +123,6 @@ io.on('connection', (socket) => {
     });
 
     // ── HOST START ───────────────────────────────────────────────
-    // NOTE: client emits 'host_start', NOT 'start_game'
     socket.on('host_start', ({ roomId }) => {
         const check = canStartGame(roomId, socket.id);
         if (check.error) {
@@ -119,8 +142,11 @@ io.on('connection', (socket) => {
     });
 
     // ── SUBMIT WORD ──────────────────────────────────────────────
-    socket.on('submit_word', ({ roomId, word }) => {
+    socket.on('submit_word', async ({ roomId, word }) => {
         if (!roomId || !word) return;
+
+        // Block spam submissions while API check is in progress
+        if (pendingApiCheck.has(socket.id)) return;
 
         const result = submitWord(roomId, socket.id, word);
 
@@ -130,9 +156,60 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Soft invalid (wrong letters, not in word list, already used, etc.)
-        // Emit word_result to the submitting player only
+        // Soft invalid — check if the reason is "NOT IN WORD LIST"
+        // If so, try the dictionary API as a fallback
         if (result.invalid) {
+            const w = word.toLowerCase().trim();
+            const isNotInList = result.invalid.includes('NOT IN WORD LIST');
+
+            if (isNotInList) {
+                // Check if we already confirmed this word via API this session
+                if (apiWordCache.has(w)) {
+                    // Word is API-confirmed, inject it into the word list and resubmit
+                    const { WORD_LIST } = require('./wordList');
+                    WORD_LIST.add(w);
+                    const retryResult = submitWord(roomId, socket.id, word);
+                    handleSubmitResult(retryResult, roomId, socket, word);
+                    return;
+                }
+
+                // Lock this player from submitting again until check is done
+                pendingApiCheck.add(socket.id);
+                socket.emit('checking_word', { word: w.toUpperCase() });
+
+                console.log(`[API] Checking "${w}" via dictionary API...`);
+                const isValid = await checkWordWithApi(w);
+
+                pendingApiCheck.delete(socket.id);
+
+                if (isValid) {
+                    // Cache it and add to the live word list
+                    apiWordCache.add(w);
+                    const { WORD_LIST } = require('./wordList');
+                    WORD_LIST.add(w);
+
+                    console.log(`[API] "${w}" confirmed valid — added to session cache`);
+
+                    const retryResult = submitWord(roomId, socket.id, word);
+                    handleSubmitResult(retryResult, roomId, socket, word);
+                } else {
+                    console.log(`[API] "${w}" rejected by dictionary API`);
+                    socket.emit('word_result', {
+                        playerId: socket.id,
+                        valid: false,
+                        word: w.toUpperCase(),
+                        reason: result.invalid,
+                        scores: getRoomSafely(roomId)?.players.map(p => ({
+                            id: p.id,
+                            name: p.name,
+                            score: p.score,
+                        })) || [],
+                    });
+                }
+                return;
+            }
+
+            // Any other invalid reason (wrong letters, already used, too short)
             socket.emit('word_result', {
                 playerId: socket.id,
                 valid: false,
@@ -147,47 +224,75 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Valid word — someone won the round
         if (result.won) {
-            const room = getRoom(roomId);
-            if (room) clearRoomTimer(room);
-
-            console.log(`[W] ${result.winnerName} won round with "${result.word}" in room ${roomId}`);
-
-            // Tell the winner their result first
-            socket.emit('word_result', {
-                playerId: socket.id,
-                valid: true,
-                word: result.word,
-                points: 10,
-                scores: result.scores,
-            });
-
-            // Tell everyone the round is over
-            io.to(roomId).emit('round_won', {
-                winnerId: result.winnerId,
-                winnerName: result.winnerName,
-                word: result.word,
-                scores: result.scores,
-            });
-
-            // Advance after pause
-            setTimeout(() => {
-                if (isGameOver(roomId)) {
-                    endGame(roomId);
-                } else {
-                    startNextRound(roomId);
-                }
-            }, BETWEEN_ROUND);
+            handleSubmitResult(result, roomId, socket, word);
         }
     });
 
     // ── DISCONNECT ───────────────────────────────────────────────
     socket.on('disconnect', () => {
         console.log(`[-] Disconnected: ${socket.id}`);
+        pendingApiCheck.delete(socket.id);
         handlePlayerDisconnect(socket.id);
     });
 });
+
+// ═══════════════════════════════════════════════════════════════
+//  HANDLE SUBMIT RESULT
+//  Shared logic for both direct wins and API-confirmed wins
+// ═══════════════════════════════════════════════════════════════
+function handleSubmitResult(result, roomId, socket, word) {
+    if (result.error) {
+        socket.emit('error_msg', result.error);
+        return;
+    }
+
+    if (result.invalid) {
+        socket.emit('word_result', {
+            playerId: socket.id,
+            valid: false,
+            word: word.toUpperCase(),
+            reason: result.invalid,
+            scores: getRoomSafely(roomId)?.players.map(p => ({
+                id: p.id,
+                name: p.name,
+                score: p.score,
+            })) || [],
+        });
+        return;
+    }
+
+    if (result.won) {
+        const room = getRoom(roomId);
+        if (room) clearRoomTimer(room);
+
+        console.log(`[W] ${result.winnerName} won round with "${result.word}" in room ${roomId} (+${result.pointsAwarded}pts)`);
+
+        socket.emit('word_result', {
+            playerId: socket.id,
+            valid: true,
+            word: result.word,
+            points: result.pointsAwarded,
+            scores: result.scores,
+        });
+
+        io.to(roomId).emit('round_won', {
+            winnerId: result.winnerId,
+            winnerName: result.winnerName,
+            word: result.word,
+            points: result.pointsAwarded,
+            scores: result.scores,
+        });
+
+        setTimeout(() => {
+            if (isGameOver(roomId)) {
+                endGame(roomId);
+            } else {
+                startNextRound(roomId);
+            }
+        }, BETWEEN_ROUND);
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  ROUND TIMER
@@ -239,7 +344,6 @@ function endGame(roomId) {
     const results = getFinalResults(roomId);
     if (!results) return;
 
-    // Get a hint for the last pair as a bonus fact
     const lastPairKey = room.currentPairKey;
     const { pairAnswers } = require('./wordList');
     const hintPool = pairAnswers[lastPairKey] || [];
@@ -280,13 +384,11 @@ function handlePlayerDisconnect(socketId) {
 
     console.log(`[D] Player left : ${socketId} from room ${roomId}`);
 
-    // If mid-game and not enough players remain, abort
     if (safeRoom && safeRoom.state === 'playing') {
         const activePlayers = safeRoom.players.filter(p => p.active);
         if (activePlayers.length < 2) {
             const room = getRoom(roomId);
             if (room) clearRoomTimer(room);
-            // End the game properly rather than just aborting
             endGame(roomId);
         }
     }

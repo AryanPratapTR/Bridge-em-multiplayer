@@ -1,13 +1,12 @@
-const { WORD_LIST, pairAnswers, VALID_PAIRS } = require('./wordList');
+const { WORD_LIST, pairAnswers, VALID_PAIRS, EASY_PAIRS, MEDIUM_PAIRS, HARD_PAIRS } = require('./wordList');
 
 // ═══════════════════════════════════════════════════════════════
 //  CONSTANTS
 // ═══════════════════════════════════════════════════════════════
-const ROUND_TIME = 15;   // seconds per round
-const BETWEEN_ROUND = 4000; // ms pause between rounds
+const ROUND_TIME = 15;       // seconds per round
+const BETWEEN_ROUND = 4000;  // ms pause between rounds
 const MAX_PLAYERS = 6;
 const MIN_PLAYERS = 2;
-const POINTS_PER_WIN = 10;
 
 // ═══════════════════════════════════════════════════════════════
 //  IN-MEMORY ROOM STORE
@@ -33,16 +32,50 @@ function generateRoomCode() {
     for (let i = 0; i < 6; i++) {
         code += chars[Math.floor(Math.random() * chars.length)];
     }
-    // Ensure uniqueness
     return rooms[code] ? generateRoomCode() : code;
 }
 
-// Pick a random pair that hasn't been used this game
-function pickFreshPair(usedPairs) {
-    const available = VALID_PAIRS.filter(p => !usedPairs.has(p));
-    // If we've exhausted all pairs just reset and reuse
-    const pool = available.length > 0 ? available : VALID_PAIRS;
-    return pool[Math.floor(Math.random() * pool.length)];
+// Returns points based on word length
+function getWordPoints(word) {
+    const len = word.length;
+    if (len >= 10) return 25;
+    if (len >= 8) return 20;
+    if (len >= 6) return 15;
+    return 10;
+}
+
+// Determine difficulty tier based on current round number
+function getDifficultyTier() {
+    const rand = Math.random() * 100;
+    if (rand < 80) return 'easy';
+    if (rand < 95) return 'medium';
+    return 'hard';
+}
+
+// Pick a fresh pair from the appropriate difficulty tier
+function pickFreshPairByTier(usedPairs, tier) {
+    const tierMap = {
+        easy: EASY_PAIRS,
+        medium: MEDIUM_PAIRS,
+        hard: HARD_PAIRS,
+    };
+
+    // Try the intended tier first, then fall back to others if exhausted
+    const order = tier === 'easy'
+        ? ['easy', 'medium', 'hard']
+        : tier === 'medium'
+            ? ['medium', 'easy', 'hard']
+            : ['hard', 'medium', 'easy'];
+
+    for (const t of order) {
+        const available = tierMap[t].filter(p => !usedPairs.has(p));
+        if (available.length > 0) {
+            return available[Math.floor(Math.random() * available.length)];
+        }
+    }
+
+    // Absolute fallback — reuse any pair
+    return VALID_PAIRS[Math.floor(Math.random() * VALID_PAIRS.length)];
 }
 
 // Get a hint word for a given pair key, excluding already-used words
@@ -69,16 +102,16 @@ function createRoom(hostId, hostName, totalRounds = 10) {
             ready: false,
             active: true
         }],
-        state: 'lobby',      // lobby | playing | between | ended
-        currentPair: null,     // { start, end }
-        currentPairKey: null,     // e.g. "ae"
+        state: 'lobby',
+        currentPair: null,
+        currentPairKey: null,
         roundWon: false,
         roundNumber: 0,
         totalRounds: totalRounds,
         usedPairs: new Set(),
         usedWordsThisRound: new Set(),
         timerRef: null,
-        timerStart: null,     // Date.now() when round started
+        timerStart: null,
     };
     return roomId;
 }
@@ -110,17 +143,14 @@ function leaveRoom(roomId, playerId) {
     const room = rooms[roomId];
     if (!room) return null;
 
-    // Mark player inactive
     const player = room.players.find(p => p.id === playerId);
     if (player) player.active = false;
 
-    // If host left, assign next active player as host
     if (room.hostId === playerId) {
         const nextHost = room.players.find(p => p.active);
         if (nextHost) room.hostId = nextHost.id;
     }
 
-    // Clean up room if everyone left
     const anyoneLeft = room.players.some(p => p.active);
     if (!anyoneLeft) {
         clearRoomTimer(room);
@@ -138,7 +168,6 @@ function getRoom(roomId) {
 function getRoomSafely(roomId) {
     const room = rooms[roomId];
     if (!room) return null;
-    // Return a copy without the timer ref (not serialisable)
     return {
         id: room.id,
         hostId: room.hostId,
@@ -167,7 +196,6 @@ function canStartGame(roomId, requesterId) {
     return { success: true };
 }
 
-// Called by index.js — returns the first round's pair data
 function startGame(roomId) {
     const room = rooms[roomId];
     room.state = 'playing';
@@ -176,7 +204,6 @@ function startGame(roomId) {
     return advanceRound(roomId);
 }
 
-// Moves to the next round, returns round info to broadcast
 function advanceRound(roomId) {
     const room = rooms[roomId];
 
@@ -185,7 +212,8 @@ function advanceRound(roomId) {
     room.usedWordsThisRound = new Set();
     room.state = 'playing';
 
-    const pairKey = pickFreshPair(room.usedPairs);
+    const tier = getDifficultyTier();
+    const pairKey = pickFreshPairByTier(room.usedPairs, tier);
     room.usedPairs.add(pairKey);
     room.currentPairKey = pairKey;
     room.currentPair = {
@@ -199,12 +227,12 @@ function advanceRound(roomId) {
         totalRounds: room.totalRounds,
         pair: room.currentPair,
         timeLimit: ROUND_TIME,
+        difficulty: tier,
     };
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  WORD SUBMISSION
-//  Returns an object describing the outcome
 // ═══════════════════════════════════════════════════════════════
 function submitWord(roomId, playerId, word) {
     const room = rooms[roomId];
@@ -239,21 +267,24 @@ function submitWord(roomId, playerId, word) {
         return { invalid: `"${w.toUpperCase()}" NOT IN WORD LIST!` };
 
     // ── Valid & first! ───────────────────────────────────────────
-    room.roundWon = true;   // lock immediately — Node is single-threaded
+    room.roundWon = true;
     room.usedWordsThisRound.add(w);
-    player.score += POINTS_PER_WIN;
+
+    const pointsAwarded = getWordPoints(w);
+    player.score += pointsAwarded;
 
     return {
         won: true,
         winnerId: playerId,
         winnerName: player.name,
         word: w.toUpperCase(),
+        pointsAwarded: pointsAwarded,
         scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score })),
     };
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  ROUND TIMEOUT (called by index.js when server timer fires)
+//  ROUND TIMEOUT
 // ═══════════════════════════════════════════════════════════════
 function handleRoundTimeout(roomId) {
     const room = rooms[roomId];
@@ -294,7 +325,7 @@ function getFinalResults(roomId) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  TIMER HELPERS (refs stored so index.js can clear them)
+//  TIMER HELPERS
 // ═══════════════════════════════════════════════════════════════
 function setRoomTimer(roomId, fn, ms) {
     const room = rooms[roomId];
@@ -309,7 +340,7 @@ function clearRoomTimer(room) {
         room.timerRef = null;
     }
 }
-// Finds which roomId a given socket/player ID belongs to
+
 function findRoomByPlayer(playerId) {
     for (const [roomId, room] of Object.entries(rooms)) {
         if (room.players.find(p => p.id === playerId)) {
@@ -318,6 +349,7 @@ function findRoomByPlayer(playerId) {
     }
     return null;
 }
+
 // ═══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ═══════════════════════════════════════════════════════════════

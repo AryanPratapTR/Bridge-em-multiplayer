@@ -17,28 +17,28 @@
         }
 
         :root {
-            --primary: #6c63ff;
-            --primary-dark: #574fd6;
-            --primary-light: #ede9ff;
-            --secondary: #e05070;
-            --secondary-light: #fde8ed;
-            --accent: #3aaa6e;
-            --accent-light: #e6f7ee;
-            --accent2: #e8a020;
-            --accent2-light: #fef3dc;
-            --bg: #f5f4f0;
-            --bg2: #ececea;
+            --primary: #b5836e;
+            --primary-dark: #9a6b58;
+            --primary-light: #f5ebe5;
+            --secondary: #c97d5b;
+            --secondary-light: #faeee6;
+            --accent: #7a9e7e;
+            --accent-light: #eaf3eb;
+            --accent2: #c9a96e;
+            --accent2-light: #faf3e3;
+            --bg: #fdf8f3;
+            --bg2: #f5ede4;
             --card: #ffffff;
-            --card2: #f0eeeb;
-            --border: #d9d6cf;
-            --text: #1a1a1a;
-            --text-muted: #6b6b6b;
-            --success: #3aaa6e;
-            --error: #e05070;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.07);
+            --card2: #faf4ee;
+            --border: #e8ddd4;
+            --text: #2d2016;
+            --text-muted: #8a7060;
+            --success: #7a9e7e;
+            --error: #c97d5b;
+            --radius: 20px;
+            --radius-sm: 14px;
+            --shadow: 0 2px 16px rgba(181, 131, 110, 0.10);
+            --shadow-card: 0 2px 10px rgba(181, 131, 110, 0.08);
         }
 
         html,
@@ -50,12 +50,80 @@
             overflow-x: hidden;
         }
 
+        #bgCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-item {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .bg-letter {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            color: rgba(181, 131, 110, 0.07);
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(20deg);
+                opacity: 0;
+            }
+        }
+
+        .bg-shape {
+            opacity: 0;
+            animation: shapeDrift ease-in-out infinite;
+        }
+
+        @keyframes shapeDrift {
+            0% {
+                opacity: 0;
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            15% {
+                opacity: 1;
+            }
+
+            85% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) rotate(12deg);
+            }
+        }
+
         .app {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 16px;
+            position: relative;
+            z-index: 1;
         }
 
         .screen {
@@ -83,49 +151,80 @@
             }
         }
 
-        /* ── CARD ── */
         .card {
             background: var(--card);
             border-radius: var(--radius);
             box-shadow: var(--shadow-card);
             border: 1.5px solid var(--border);
             width: 100%;
-            padding: 24px 22px;
+            padding: 26px 24px;
             margin-bottom: 14px;
         }
 
-        /* ── NAYRA MASCOT ── */
+        /* ── MASCOT VIDEO ── */
         .mascot-wrap {
             display: flex;
             justify-content: center;
-            margin-bottom: 6px;
+            align-items: flex-end;
+            margin-bottom: 8px;
+            cursor: pointer;
             position: relative;
         }
 
-        .mascot-wrap svg {
-            transition: transform 0.3s ease;
+        .mascot-video {
+            border-radius: 0;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 16px rgba(181, 131, 110, 0.28));
+            transition: transform 0.25s ease;
+            background: transparent;
+            mix-blend-mode: multiply;
         }
 
-        .mascot-wrap svg:hover {
-            transform: scale(1.04) rotate(-2deg);
+        .mascot-video:hover {
+            transform: scale(1.07) rotate(-2deg);
         }
 
-        /* Nayra dialogue bubble */
+        .mascot-video-sm {
+            border-radius: 0;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(181, 131, 110, 0.22));
+            background: transparent;
+            mix-blend-mode: multiply;
+        }
+
+        @keyframes mascotBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-7px);
+            }
+        }
+
+        .mascot-bounce {
+            animation: mascotBounce 2.8s ease-in-out infinite;
+        }
+
+        /* ── DIALOGUE BUBBLE ── */
         .nayra-bubble {
             display: none;
             position: fixed;
             z-index: 9999;
-            background: #fff;
+            background: #fffaf6;
             border: 2px solid var(--primary);
-            border-radius: 18px;
-            padding: 14px 18px;
+            border-radius: 22px;
+            padding: 13px 18px;
             max-width: 240px;
-            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.15);
-            font-size: 0.88rem;
+            box-shadow: 0 6px 24px rgba(181, 131, 110, 0.18);
+            font-size: 0.87rem;
             font-weight: 700;
             color: var(--text);
             text-align: center;
-            animation: popIn 0.25s cubic-bezier(.4, 0, .2, 1);
+            animation: popIn 0.22s cubic-bezier(.4, 0, .2, 1);
+            pointer-events: none;
         }
 
         .nayra-bubble::after {
@@ -134,7 +233,7 @@
             bottom: -12px;
             left: 50%;
             transform: translateX(-50%);
-            border: 6px solid transparent;
+            border: 7px solid transparent;
             border-top-color: var(--primary);
         }
 
@@ -145,7 +244,7 @@
         @keyframes popIn {
             from {
                 opacity: 0;
-                transform: scale(0.85);
+                transform: scale(0.82);
             }
 
             to {
@@ -155,22 +254,21 @@
         }
 
         .nayra-name {
-            font-size: 0.7rem;
-            font-weight: 800;
+            font-size: 0.68rem;
+            font-weight: 900;
             color: var(--primary);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
+            letter-spacing: 1.2px;
+            margin-bottom: 5px;
         }
 
-        /* ── LOGO ── */
         .logo {
             text-align: center;
             margin-bottom: 4px;
         }
 
         .logo-title {
-            font-size: 2.1rem;
+            font-size: 2.2rem;
             font-weight: 900;
             letter-spacing: -1px;
             color: var(--primary);
@@ -182,10 +280,9 @@
             color: var(--text-muted);
             font-weight: 600;
             letter-spacing: 0.3px;
-            margin-top: 3px;
+            margin-top: 4px;
         }
 
-        /* ── BUTTONS ── */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -195,9 +292,9 @@
             font-weight: 800;
             font-size: 0.95rem;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 50px;
             cursor: pointer;
-            padding: 12px 24px;
+            padding: 13px 24px;
             transition: all 0.15s ease;
             letter-spacing: 0.2px;
             width: 100%;
@@ -221,13 +318,13 @@
         .btn-secondary {
             background: var(--secondary);
             color: #fff;
-            border: 2px solid #c0405a;
+            border: 2px solid #a8623f;
         }
 
         .btn-success {
             background: var(--accent);
             color: #fff;
-            border: 2px solid #2d8a58;
+            border: 2px solid #5e8262;
         }
 
         .btn-ghost {
@@ -251,7 +348,6 @@
             margin-bottom: 0;
         }
 
-        /* ── INPUTS ── */
         .input-group {
             width: 100%;
             margin-bottom: 11px;
@@ -271,39 +367,38 @@
             width: 100%;
             background: var(--card2);
             border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
+            border-radius: 50px;
             color: var(--text);
             font-family: 'Nunito', sans-serif;
             font-size: 0.95rem;
             font-weight: 700;
-            padding: 11px 14px;
+            padding: 11px 18px;
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(181, 131, 110, 0.14);
             background: #fff;
         }
 
         .input::placeholder {
-            color: #b0aea8;
+            color: #c4b0a4;
             font-weight: 600;
         }
 
-        /* ── ROOM CODE BADGE ── */
         .room-code-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             background: var(--primary-light);
             border: 2px solid var(--primary);
-            border-radius: var(--radius-sm);
-            padding: 9px 16px;
-            font-size: 1.4rem;
+            border-radius: 50px;
+            padding: 10px 22px;
+            font-size: 1.5rem;
             font-weight: 900;
-            letter-spacing: 5px;
+            letter-spacing: 6px;
             color: var(--primary);
             margin-bottom: 7px;
         }
@@ -317,7 +412,6 @@
             margin-bottom: 5px;
         }
 
-        /* ── HUD ── */
         .hud {
             display: flex;
             justify-content: space-between;
@@ -330,12 +424,12 @@
         .hud-chip {
             background: var(--card);
             border-radius: 50px;
-            padding: 7px 16px;
+            padding: 8px 18px;
             display: flex;
             flex-direction: column;
             align-items: center;
             border: 1.5px solid var(--border);
-            min-width: 76px;
+            min-width: 80px;
             box-shadow: var(--shadow-card);
         }
 
@@ -358,7 +452,39 @@
             color: var(--accent2);
         }
 
-        /* ── LETTER TILES ── */
+        .difficulty-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 16px;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+            border: 1.5px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-badge.easy {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-color: #b2d4b6;
+        }
+
+        .difficulty-badge.medium {
+            background: var(--accent2-light);
+            color: var(--accent2);
+            border-color: #e8d4a0;
+        }
+
+        .difficulty-badge.hard {
+            background: var(--secondary-light);
+            color: var(--secondary);
+            border-color: #e8c4a8;
+        }
+
         .tiles-row {
             display: flex;
             align-items: center;
@@ -373,10 +499,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 82px;
-            height: 82px;
-            border-radius: 14px;
-            font-size: 2.3rem;
+            width: 84px;
+            height: 84px;
+            border-radius: 22px;
+            font-size: 2.4rem;
             font-weight: 900;
             letter-spacing: -1px;
             border: 2px solid transparent;
@@ -411,10 +537,9 @@
         .tile-arrow {
             font-size: 1.3rem;
             color: var(--text-muted);
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
-        /* ── TIMER ── */
         .timer-wrap {
             width: 100%;
             margin-bottom: 16px;
@@ -443,7 +568,7 @@
 
         .timer-track {
             width: 100%;
-            height: 7px;
+            height: 8px;
             background: var(--bg2);
             border-radius: 50px;
             overflow: hidden;
@@ -465,7 +590,6 @@
             background: var(--secondary);
         }
 
-        /* ── WORD INPUT ROW ── */
         .word-input-row {
             display: flex;
             gap: 9px;
@@ -484,14 +608,15 @@
             background: var(--primary);
             color: #fff;
             border: 2px solid var(--primary-dark);
-            border-radius: var(--radius-sm);
+            border-radius: 50px;
             font-family: 'Nunito', sans-serif;
             font-weight: 900;
             font-size: 0.95rem;
-            padding: 0 20px;
+            padding: 0 22px;
             cursor: pointer;
             transition: all 0.15s;
             white-space: nowrap;
+            min-width: 68px;
         }
 
         .go-btn:hover {
@@ -502,18 +627,25 @@
             transform: scale(0.96);
         }
 
-        /* ── FEEDBACK ── */
+        .go-btn.checking {
+            background: var(--accent2);
+            border-color: #a8823a;
+            cursor: not-allowed;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+        }
+
         .feedback {
             width: 100%;
             min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: var(--radius-sm);
+            border-radius: 50px;
             font-size: 0.9rem;
             font-weight: 800;
             margin-bottom: 12px;
-            padding: 9px 14px;
+            padding: 9px 18px;
             text-align: center;
             transition: all 0.22s;
             opacity: 0;
@@ -526,22 +658,21 @@
         .feedback.correct {
             background: var(--accent-light);
             color: var(--accent);
-            border: 1.5px solid #b2dfc8;
+            border: 1.5px solid #b2d4b6;
         }
 
         .feedback.wrong {
             background: var(--secondary-light);
             color: var(--secondary);
-            border: 1.5px solid #f5bfca;
+            border: 1.5px solid #e8c4a8;
         }
 
         .feedback.info {
             background: var(--primary-light);
             color: var(--primary);
-            border: 1.5px solid #c8c2f5;
+            border: 1.5px solid #ddc8be;
         }
 
-        /* ── USED WORDS ── */
         .used-section {
             width: 100%;
         }
@@ -566,7 +697,7 @@
         .used-chip {
             background: var(--card2);
             border-radius: 50px;
-            padding: 3px 11px;
+            padding: 3px 13px;
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--text-muted);
@@ -578,10 +709,9 @@
         .used-chip.correct-chip {
             background: var(--accent-light);
             color: var(--accent);
-            border-color: #b2dfc8;
+            border-color: #b2d4b6;
         }
 
-        /* ── SCOREBOARD ── */
         .scoreboard {
             width: 100%;
             margin-bottom: 12px;
@@ -602,7 +732,7 @@
             justify-content: space-between;
             background: var(--card2);
             border-radius: var(--radius-sm);
-            padding: 9px 13px;
+            padding: 10px 14px;
             margin-bottom: 5px;
             border: 1.5px solid var(--border);
             transition: border-color 0.2s;
@@ -636,7 +766,7 @@
         .badge {
             font-size: 0.62rem;
             font-weight: 800;
-            padding: 2px 7px;
+            padding: 2px 8px;
             border-radius: 50px;
             text-transform: uppercase;
             letter-spacing: 0.4px;
@@ -652,9 +782,8 @@
             color: var(--accent);
         }
 
-        /* ── GAME OVER ── */
         .go-title {
-            font-size: 1.8rem;
+            font-size: 1.9rem;
             font-weight: 900;
             text-align: center;
             color: var(--primary);
@@ -670,7 +799,7 @@
         }
 
         .score-big {
-            font-size: 2.8rem;
+            font-size: 3rem;
             font-weight: 900;
             color: var(--accent2);
             text-align: center;
@@ -689,9 +818,9 @@
         .hint-box {
             width: 100%;
             background: var(--primary-light);
-            border: 1.5px solid #c8c2f5;
+            border: 1.5px solid #ddc8be;
             border-radius: var(--radius-sm);
-            padding: 11px 14px;
+            padding: 12px 16px;
             text-align: center;
             margin-bottom: 12px;
         }
@@ -713,7 +842,6 @@
             letter-spacing: 2px;
         }
 
-        /* ── DIVIDER ── */
         .divider {
             width: 100%;
             height: 1px;
@@ -721,7 +849,6 @@
             margin: 14px 0;
         }
 
-        /* ── SECTION TITLE ── */
         .section-title {
             font-size: 1rem;
             font-weight: 900;
@@ -730,7 +857,6 @@
             text-align: center;
         }
 
-        /* ── STATUS MSG ── */
         .status-msg {
             font-size: 0.82rem;
             font-weight: 700;
@@ -747,7 +873,6 @@
             color: var(--success);
         }
 
-        /* ── WAITING ANIMATION ── */
         .waiting-dots::after {
             content: '';
             animation: dots 1.5s infinite;
@@ -771,7 +896,6 @@
             }
         }
 
-        /* ── PULSE ── */
         @keyframes pulse {
 
             0%,
@@ -788,7 +912,6 @@
             animation: pulse 2.2s ease-in-out infinite;
         }
 
-        /* ── TICKER ── */
         .ticker-wrap {
             width: 100%;
             overflow: hidden;
@@ -820,15 +943,14 @@
             }
         }
 
-        /* ── RESPONSIVE ── */
         @media (max-width: 400px) {
             .logo-title {
-                font-size: 1.8rem;
+                font-size: 1.9rem;
             }
 
             .letter-tile {
-                width: 70px;
-                height: 70px;
+                width: 72px;
+                height: 72px;
                 font-size: 2rem;
             }
 
@@ -841,7 +963,6 @@
             }
         }
 
-        /* ── SCROLLBAR ── */
         ::-webkit-scrollbar {
             width: 4px;
             height: 4px;
@@ -860,118 +981,26 @@
 
 <body>
 
-    <!-- Nayra floating dialogue bubble -->
+    <div id="bgCanvas"></div>
+
     <div class="nayra-bubble" id="nayraDialogue">
         <div class="nayra-name">Nayra says</div>
-        <div id="nayraText">Hi there!</div>
+        <div id="nayraText">Hi there! 👋</div>
     </div>
 
     <div class="app">
 
-        <!-- ═══════════════ LOBBY SCREEN ═══════════════ -->
+        <!-- ═══════════════ LOBBY ═══════════════ -->
         <div class="screen active" id="lobbyScreen">
 
-            <div class="mascot-wrap pulse" id="nayraLobby" onclick="showNayraDialogue(event)">
-                <!-- Nayra SVG - girl with long hair, friendly face -->
-                <svg width="110" height="132" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <radialGradient id="skinG" cx="50%" cy="40%" r="60%">
-                            <stop offset="0%" stop-color="#ffe0c8" />
-                            <stop offset="100%" stop-color="#f5c8a8" />
-                        </radialGradient>
-                        <radialGradient id="eyeG" cx="35%" cy="35%" r="60%">
-                            <stop offset="0%" stop-color="#5a3e8a" />
-                            <stop offset="100%" stop-color="#3a2060" />
-                        </radialGradient>
-                        <linearGradient id="hairG" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#3d2000" />
-                            <stop offset="100%" stop-color="#6b3800" />
-                        </linearGradient>
-                        <linearGradient id="dressG" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#a78bfa" />
-                            <stop offset="100%" stop-color="#7c3aed" />
-                        </linearGradient>
-                    </defs>
-                    <!-- Shadow -->
-                    <ellipse cx="55" cy="128" rx="26" ry="4" fill="rgba(0,0,0,0.10)" />
-                    <!-- Hair back -->
-                    <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG)" />
-                    <!-- Long hair sides -->
-                    <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#hairG)" />
-                    <rect x="82" y="52" width="14" height="48" rx="7" fill="url(#hairG)" />
-                    <!-- Dress / Body -->
-                    <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
-                        fill="url(#dressG)" />
-                    <!-- Dress collar detail -->
-                    <path d="M44 88 Q55 95 66 88" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="none" />
-                    <!-- Neck -->
-                    <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG)" />
-                    <!-- Head -->
-                    <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG)" />
-                    <!-- Hair top / fringe -->
-                    <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG)" />
-                    <!-- Hair parting detail -->
-                    <path d="M55 18 Q57 30 55 36" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" fill="none" />
-                    <!-- Ears -->
-                    <ellipse cx="23" cy="52" rx="6" ry="8" fill="url(#skinG)" />
-                    <ellipse cx="87" cy="52" rx="6" ry="8" fill="url(#skinG)" />
-                    <ellipse cx="23" cy="52" rx="3.5" ry="5" fill="#f0b898" opacity="0.5" />
-                    <ellipse cx="87" cy="52" rx="3.5" ry="5" fill="#f0b898" opacity="0.5" />
-                    <!-- Small earrings -->
-                    <circle cx="23" cy="57" r="2.5" fill="#a78bfa" />
-                    <circle cx="87" cy="57" r="2.5" fill="#a78bfa" />
-                    <!-- Eyes whites -->
-                    <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
-                    <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
-                    <!-- Iris -->
-                    <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG)" />
-                    <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG)" />
-                    <!-- Pupils -->
-                    <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                    <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                    <!-- Eye shine -->
-                    <ellipse cx="45" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
-                    <ellipse cx="69" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
-                    <!-- Lashes -->
-                    <path d="M35 42 Q43 38 51 41" stroke="#3d2000" stroke-width="2" fill="none"
-                        stroke-linecap="round" />
-                    <path d="M59 41 Q67 38 75 42" stroke="#3d2000" stroke-width="2" fill="none"
-                        stroke-linecap="round" />
-                    <!-- Eyebrows -->
-                    <path d="M36 41 Q43 37 50 40" stroke="#5a3200" stroke-width="2.2" fill="none"
-                        stroke-linecap="round" />
-                    <path d="M60 40 Q67 37 74 41" stroke="#5a3200" stroke-width="2.2" fill="none"
-                        stroke-linecap="round" />
-                    <!-- Blush -->
-                    <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                    <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                    <!-- Nose -->
-                    <path d="M52 58 Q55 62 58 58" stroke="#d09070" stroke-width="1.5" fill="none"
-                        stroke-linecap="round" />
-                    <!-- Smile -->
-                    <path d="M45 66 Q55 75 65 66" stroke="#c06050" stroke-width="2.5" fill="none"
-                        stroke-linecap="round" />
-                    <!-- Teeth hint -->
-                    <path d="M48 67 Q55 72 62 67" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"
-                        opacity="0.6" />
-                    <!-- Arms -->
-                    <ellipse cx="19" cy="100" rx="9" ry="15" fill="url(#skinG)" transform="rotate(-8 19 100)" />
-                    <ellipse cx="91" cy="100" rx="9" ry="15" fill="url(#skinG)" transform="rotate(8 91 100)" />
-                    <!-- Hands -->
-                    <circle cx="16" cy="114" r="7" fill="url(#skinG)" />
-                    <circle cx="94" cy="114" r="7" fill="url(#skinG)" />
-                    <!-- Legs -->
-                    <rect x="37" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
-                    <rect x="60" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
-                    <!-- Shoes -->
-                    <ellipse cx="43" cy="130" rx="8" ry="4" fill="#3d2000" />
-                    <ellipse cx="66" cy="130" rx="8" ry="4" fill="#3d2000" />
-                </svg>
+            <div class="mascot-wrap pulse" onclick="showNayraDialogue(event)">
+                <video class="mascot-video" width="200" height="200" autoplay loop muted playsinline src="/mascot.webm">
+                </video>
             </div>
 
             <div class="logo">
                 <div class="logo-title">Bridge-Em</div>
-                <div class="logo-sub">Bridge the gap between two letters!</div>
+                <div class="logo-sub">Take Em Letters, Join Em Better!</div>
             </div>
 
             <div class="card" style="margin-top:18px;">
@@ -980,7 +1009,6 @@
                     <button class="btn btn-secondary" onclick="showSection('joinSection')">→ Join Room</button>
                 </div>
 
-                <!-- Create Section -->
                 <div id="createSection" style="display:none;">
                     <div class="divider"></div>
                     <div class="section-title">Create a Room</div>
@@ -997,14 +1025,13 @@
                     <div class="status-msg" id="createStatus"></div>
                 </div>
 
-                <!-- Join Section -->
                 <div id="joinSection" style="display:none;">
                     <div class="divider"></div>
                     <div class="section-title">Join a Room</div>
                     <div class="input-group">
                         <label>Room Code</label>
                         <input class="input" id="joinRoomCode" placeholder="e.g. AB12CD" maxlength="6"
-                            style="text-transform:uppercase; letter-spacing:4px; font-size:1.1rem;" />
+                            style="text-transform:uppercase;letter-spacing:4px;font-size:1.1rem;" />
                     </div>
                     <div class="input-group">
                         <label>Your Name</label>
@@ -1016,69 +1043,20 @@
             </div>
 
             <div class="ticker-wrap">
-                <span class="ticker">⭐ WELCOME TO BRIDGE-EM &nbsp;&nbsp; FIND WORDS THAT START AND END WITH THE GIVEN
-                    LETTERS &nbsp;&nbsp; FASTEST FINGER WINS &nbsp;&nbsp; GOOD LUCK! ⭐</span>
+                <span class="ticker">🍪 WELCOME TO BRIDGE-EM &nbsp;&nbsp; FIND WORDS THAT START AND END WITH THE GIVEN
+                    LETTERS &nbsp;&nbsp; FASTEST FINGER WINS &nbsp;&nbsp; GOOD LUCK! 🍪</span>
             </div>
         </div>
 
-        <!-- ═══════════════ WAITING ROOM SCREEN ═══════════════ -->
+        <!-- ═══════════════ WAITING ROOM ═══════════════ -->
         <div class="screen" id="waitingScreen">
-            <div class="mascot-wrap" id="nayraWaiting" onclick="showNayraDialogue(event)">
-                <svg width="80" height="96" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <radialGradient id="skinG2" cx="50%" cy="40%" r="60%">
-                            <stop offset="0%" stop-color="#ffe0c8" />
-                            <stop offset="100%" stop-color="#f5c8a8" />
-                        </radialGradient>
-                        <radialGradient id="eyeG2" cx="35%" cy="35%" r="60%">
-                            <stop offset="0%" stop-color="#5a3e8a" />
-                            <stop offset="100%" stop-color="#3a2060" />
-                        </radialGradient>
-                        <linearGradient id="hairG2" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#3d2000" />
-                            <stop offset="100%" stop-color="#6b3800" />
-                        </linearGradient>
-                        <linearGradient id="dressG2" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#a78bfa" />
-                            <stop offset="100%" stop-color="#7c3aed" />
-                        </linearGradient>
-                    </defs>
-                    <ellipse cx="55" cy="128" rx="26" ry="4" fill="rgba(0,0,0,0.10)" />
-                    <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG2)" />
-                    <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#hairG2)" />
-                    <rect x="82" y="52" width="14" height="48" rx="7" fill="url(#hairG2)" />
-                    <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
-                        fill="url(#dressG2)" />
-                    <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG2)" />
-                    <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG2)" />
-                    <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG2)" />
-                    <ellipse cx="23" cy="52" rx="6" ry="8" fill="url(#skinG2)" />
-                    <ellipse cx="87" cy="52" rx="6" ry="8" fill="url(#skinG2)" />
-                    <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
-                    <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
-                    <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG2)" />
-                    <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG2)" />
-                    <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                    <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                    <ellipse cx="45" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
-                    <ellipse cx="69" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
-                    <path d="M36 41 Q43 37 50 40" stroke="#5a3200" stroke-width="2.2" fill="none"
-                        stroke-linecap="round" />
-                    <path d="M60 40 Q67 37 74 41" stroke="#5a3200" stroke-width="2.2" fill="none"
-                        stroke-linecap="round" />
-                    <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                    <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                    <!-- Waiting / curious expression -->
-                    <path d="M46 67 Q55 73 64 67" stroke="#c06050" stroke-width="2.5" fill="none"
-                        stroke-linecap="round" />
-                    <ellipse cx="19" cy="100" rx="9" ry="15" fill="url(#skinG2)" transform="rotate(-8 19 100)" />
-                    <ellipse cx="91" cy="100" rx="9" ry="15" fill="url(#skinG2)" transform="rotate(8 91 100)" />
-                    <rect x="37" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
-                    <rect x="60" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
-                </svg>
+
+            <div class="mascot-wrap" onclick="showNayraDialogue(event)">
+                <video class="mascot-video" width="160" height="160" autoplay loop muted playsinline src="/mascot.mp4">
+                </video>
             </div>
 
-            <div class="card" style="margin-top:10px; text-align:center;">
+            <div class="card" style="margin-top:10px;text-align:center;">
                 <div class="section-title">Room Created! 🎉</div>
                 <div class="room-code-label">Share this code with friends</div>
                 <div class="room-code-badge" id="roomCodeDisplay">------</div>
@@ -1087,9 +1065,8 @@
                 <div class="scoreboard-title">Players in Room</div>
                 <div id="waitingPlayersList"></div>
                 <div class="divider"></div>
-                <button class="btn btn-success" id="startGameBtn" onclick="hostStartGame()" style="display:none;">
-                    ▶ Start Game
-                </button>
+                <button class="btn btn-success" id="startGameBtn" onclick="hostStartGame()" style="display:none;">▶
+                    Start Game</button>
                 <div class="status-msg" id="startHint">Need at least 2 players to start</div>
             </div>
         </div>
@@ -1097,71 +1074,38 @@
         <!-- ═══════════════ GAME SCREEN ═══════════════ -->
         <div class="screen" id="gameScreen">
 
-            <!-- HUD -->
             <div class="hud">
                 <div class="hud-chip">
                     <span class="hud-chip-label">Score</span>
                     <span class="hud-chip-val accent" id="scoreDisplay">0</span>
                 </div>
-                <!-- Nayra mini in HUD -->
-                <div id="nayraGame" onclick="showNayraDialogue(event)" style="cursor:pointer;">
-                    <svg width="46" height="54" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <radialGradient id="skinG3" cx="50%" cy="40%" r="60%">
-                                <stop offset="0%" stop-color="#ffe0c8" />
-                                <stop offset="100%" stop-color="#f5c8a8" />
-                            </radialGradient>
-                            <radialGradient id="eyeG3" cx="35%" cy="35%" r="60%">
-                                <stop offset="0%" stop-color="#5a3e8a" />
-                                <stop offset="100%" stop-color="#3a2060" />
-                            </radialGradient>
-                            <linearGradient id="hairG3" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#3d2000" />
-                                <stop offset="100%" stop-color="#6b3800" />
-                            </linearGradient>
-                            <linearGradient id="dressG3" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#a78bfa" />
-                                <stop offset="100%" stop-color="#7c3aed" />
-                            </linearGradient>
-                        </defs>
-                        <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG3)" />
-                        <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
-                            fill="url(#dressG3)" />
-                        <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG3)" />
-                        <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG3)" />
-                        <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG3)" />
-                        <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
-                        <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
-                        <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG3)" />
-                        <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG3)" />
-                        <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                        <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                        <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                        <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                        <path d="M45 66 Q55 75 65 66" stroke="#c06050" stroke-width="2.5" fill="none"
-                            stroke-linecap="round" />
-                    </svg>
+
+                <div onclick="showNayraDialogue(event)" style="cursor:pointer;" class="mascot-bounce">
+                    <video class="mascot-video-sm" width="90" height="90" autoplay loop muted playsinline
+                        src="/mascot.mp4">
+                    </video>
                 </div>
+
                 <div class="hud-chip">
                     <span class="hud-chip-label">Round</span>
                     <span class="hud-chip-val" id="roundDisplay">1</span>
                 </div>
             </div>
 
-            <!-- Letter Tiles -->
+            <div class="difficulty-badge easy" id="difficultyBadge">🟢 Easy</div>
+
             <div class="tiles-row">
-                <div class="letter-tile tile-start" id="startTile">
+                <div class="letter-tile tile-start">
                     <span class="tile-letter" id="startLetter">A</span>
                     <span class="tile-label">Start</span>
                 </div>
                 <div class="tile-arrow">⟶</div>
-                <div class="letter-tile tile-end" id="endTile">
+                <div class="letter-tile tile-end">
                     <span class="tile-letter" id="endLetter">E</span>
                     <span class="tile-label">End</span>
                 </div>
             </div>
 
-            <!-- Timer -->
             <div class="timer-wrap">
                 <div class="timer-top">
                     <span class="timer-label">Time Remaining</span>
@@ -1172,87 +1116,32 @@
                 </div>
             </div>
 
-            <!-- Input -->
             <div class="word-input-row">
                 <input class="input" id="wordInput" placeholder="Type your word..." autocomplete="off" autocorrect="off"
                     autocapitalize="characters" spellcheck="false" />
                 <button class="go-btn" id="submitBtn" onclick="submitWord()">GO</button>
             </div>
 
-            <!-- Feedback -->
             <div class="feedback" id="feedback"></div>
 
-            <!-- Scoreboard (multiplayer) -->
             <div class="scoreboard" id="liveScoreboard" style="display:none;">
                 <div class="scoreboard-title">Live Scores</div>
                 <div id="liveScoresList"></div>
             </div>
 
-            <!-- Used Words -->
             <div class="used-section">
                 <div class="used-label">Used Words</div>
                 <div class="used-chips" id="usedWords"></div>
             </div>
-
         </div>
 
-        <!-- ═══════════════ GAME OVER SCREEN ═══════════════ -->
+        <!-- ═══════════════ GAME OVER ═══════════════ -->
         <div class="screen" id="gameOverScreen">
-            <div class="mascot-wrap" id="nayraGameOver" onclick="showNayraDialogue(event)">
-                <svg width="100" height="120" viewBox="0 0 110 132" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <radialGradient id="skinG4" cx="50%" cy="40%" r="60%">
-                            <stop offset="0%" stop-color="#ffe0c8" />
-                            <stop offset="100%" stop-color="#f5c8a8" />
-                        </radialGradient>
-                        <radialGradient id="eyeG4" cx="35%" cy="35%" r="60%">
-                            <stop offset="0%" stop-color="#5a3e8a" />
-                            <stop offset="100%" stop-color="#3a2060" />
-                        </radialGradient>
-                        <linearGradient id="hairG4" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#3d2000" />
-                            <stop offset="100%" stop-color="#6b3800" />
-                        </linearGradient>
-                        <linearGradient id="dressG4" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#a78bfa" />
-                            <stop offset="100%" stop-color="#7c3aed" />
-                        </linearGradient>
-                    </defs>
-                    <ellipse cx="55" cy="128" rx="26" ry="4" fill="rgba(0,0,0,0.10)" />
-                    <ellipse cx="55" cy="50" rx="36" ry="34" fill="url(#hairG4)" />
-                    <rect x="14" y="52" width="14" height="48" rx="7" fill="url(#hairG4)" />
-                    <rect x="82" y="52" width="14" height="48" rx="7" fill="url(#hairG4)" />
-                    <path d="M28 88 Q20 110 18 126 L92 126 Q90 110 82 88 Q68 96 55 96 Q42 96 28 88Z"
-                        fill="url(#dressG4)" />
-                    <rect x="47" y="76" width="16" height="14" rx="6" fill="url(#skinG4)" />
-                    <ellipse cx="55" cy="52" rx="32" ry="30" fill="url(#skinG4)" />
-                    <path d="M23 46 Q30 18 55 18 Q80 18 87 46 Q72 28 55 30 Q38 28 23 46Z" fill="url(#hairG4)" />
-                    <ellipse cx="23" cy="52" rx="6" ry="8" fill="url(#skinG4)" />
-                    <ellipse cx="87" cy="52" rx="6" ry="8" fill="url(#skinG4)" />
-                    <ellipse cx="43" cy="50" rx="8.5" ry="9.5" fill="white" />
-                    <ellipse cx="67" cy="50" rx="8.5" ry="9.5" fill="white" />
-                    <ellipse cx="43.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG4)" />
-                    <ellipse cx="67.5" cy="51" rx="6" ry="6.5" fill="url(#eyeG4)" />
-                    <ellipse cx="43.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                    <ellipse cx="67.5" cy="51.5" rx="3.2" ry="3.5" fill="#1a0a30" />
-                    <ellipse cx="45" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
-                    <ellipse cx="69" cy="49.5" rx="2" ry="2" fill="white" opacity="0.9" />
-                    <path d="M36 41 Q43 37 50 40" stroke="#5a3200" stroke-width="2.2" fill="none"
-                        stroke-linecap="round" />
-                    <path d="M60 40 Q67 37 74 41" stroke="#5a3200" stroke-width="2.2" fill="none"
-                        stroke-linecap="round" />
-                    <ellipse cx="31" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                    <ellipse cx="79" cy="59" rx="7" ry="4" fill="#ffb8c0" opacity="0.5" />
-                    <!-- Expression set by JS -->
-                    <path id="goMouth" d="M45 66 Q55 75 65 66" stroke="#c06050" stroke-width="2.5" fill="none"
-                        stroke-linecap="round" />
-                    <ellipse cx="19" cy="100" rx="9" ry="15" fill="url(#skinG4)" transform="rotate(-8 19 100)" />
-                    <ellipse cx="91" cy="100" rx="9" ry="15" fill="url(#skinG4)" transform="rotate(8 91 100)" />
-                    <rect x="37" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
-                    <rect x="60" y="118" width="13" height="14" rx="6" fill="#7c3aed" />
-                    <ellipse cx="43" cy="130" rx="8" ry="4" fill="#3d2000" />
-                    <ellipse cx="66" cy="130" rx="8" ry="4" fill="#3d2000" />
-                </svg>
+
+            <div class="mascot-wrap" onclick="showNayraDialogue(event)">
+                <video class="mascot-video" id="mascotGameOver" width="200" height="200" autoplay loop muted playsinline
+                    src="/mascot.mp4">
+                </video>
             </div>
 
             <div class="card">
@@ -1278,62 +1167,117 @@
             </div>
 
             <div class="ticker-wrap">
-                <span class="ticker">⭐ THANKS FOR PLAYING BRIDGE-EM &nbsp;&nbsp; CAN YOU BEAT YOUR SCORE? &nbsp;&nbsp;
-                    CHALLENGE YOUR FRIENDS &nbsp;&nbsp; KEEP BRIDGING! ⭐</span>
+                <span class="ticker">🍪 THANKS FOR PLAYING BRIDGE-EM &nbsp;&nbsp; CAN YOU BEAT YOUR SCORE? &nbsp;&nbsp;
+                    CHALLENGE YOUR FRIENDS &nbsp;&nbsp; KEEP BRIDGING! 🍪</span>
             </div>
         </div>
 
-    </div><!-- /app -->
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
 
-        // ═══════════════════════════════════════════════
-        //  NAYRA DIALOGUE SYSTEM
-        // ═══════════════════════════════════════════════
-        const nayraDialogues = {
+        // ═══════════════════════════════════════════════════════
+        //  BACKGROUND
+        // ═══════════════════════════════════════════════════════
+        function buildBackground() {
+            const canvas = document.getElementById('bgCanvas');
+            const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const letterSizes = [24, 30, 38, 46, 56, 68];
+
+            for (let i = 0; i < 22; i++) {
+                const el = document.createElement('span');
+                el.className = 'bg-item bg-letter';
+                el.textContent = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                const size = letterSizes[Math.floor(Math.random() * letterSizes.length)];
+                const dur = 12 + Math.random() * 16;
+                const del = -(Math.random() * dur);
+                el.style.cssText = `
+                    left: ${2 + Math.random() * 96}%;
+                    top:  ${100 + Math.random() * 20}%;
+                    font-size: ${size}px;
+                    animation: floatUp ${dur}s ${del}s linear infinite;
+                `;
+                canvas.appendChild(el);
+            }
+
+            const shapes = [
+                `<svg width="70" height="28" viewBox="0 0 70 28"><path d="M0 14 Q17 0 35 14 Q53 28 70 14" stroke="#b5836e" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`,
+                `<svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" stroke="#c97d5b" stroke-width="2" fill="none"/></svg>`,
+                `<svg width="52" height="48" viewBox="0 0 52 48"><polygon points="26,4 50,46 2,46" stroke="#7a9e7e" stroke-width="2" fill="none"/></svg>`,
+                `<svg width="46" height="46" viewBox="0 0 46 46"><rect x="4" y="4" width="38" height="38" rx="14" stroke="#c9a96e" stroke-width="2" fill="none"/></svg>`,
+                `<svg width="40" height="40" viewBox="0 0 40 40"><line x1="20" y1="4" x2="20" y2="36" stroke="#b5836e" stroke-width="2.2" stroke-linecap="round"/><line x1="4" y1="20" x2="36" y2="20" stroke="#b5836e" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+                `<svg width="44" height="44" viewBox="0 0 44 44"><polygon points="22,2 42,22 22,42 2,22" stroke="#c97d5b" stroke-width="2" fill="none"/></svg>`,
+            ];
+
+            for (let i = 0; i < 14; i++) {
+                const wrap = document.createElement('div');
+                wrap.className = 'bg-item bg-shape';
+                wrap.innerHTML = shapes[Math.floor(Math.random() * shapes.length)];
+                const dur = 10 + Math.random() * 14;
+                const del = -(Math.random() * dur);
+                wrap.style.cssText = `
+                    left: ${2 + Math.random() * 94}%;
+                    top:  ${100 + Math.random() * 30}%;
+                    animation: floatUp ${dur}s ${del}s linear infinite;
+                `;
+                canvas.appendChild(wrap);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  DIALOGUE BUBBLE
+        // ═══════════════════════════════════════════════════════
+        const mascotLines = {
             lobby: [
-                "Hi! I'm Nayra 👋 Let's play Bridge-Em!",
-                "Think fast — words are waiting for you!",
-                "Create a room and challenge your friends!",
-                "I believe in you. Now go bridge those letters! ✨",
+                "Hi! I'm Nayra, Let's play!",
+                "Think fast — words are waiting!",
+                "Challenge your friends!",
+                "Bridge those letters! ✨",
                 "The faster you think, the more you win!",
-                "Every word counts. Ready to play?"
+                "Every word counts. Ready? 🎯"
             ],
             waiting: [
-                "Waiting for friends? Good things take time! ⏳",
-                "Tell your friends the room code!",
-                "I'm excited to see who joins next!",
+                "Waiting for friends... ⏳",
+                "Share the room code!",
                 "The more players, the more fun!",
-                "Patience is a virtue... but hurry up! 😄"
+                "Patience... but hurry! 😄",
+                "Almost there!"
             ],
             game: [
-                "You can do this! Think of a word!",
+                "You can do this! 💪",
                 "Come on, type faster! ⚡",
-                "I know you have a word in mind!",
-                "Don't overthink it — go with your gut!",
-                "Every second counts!",
-                "You've got this! I believe in you! 💪",
-                "Words, words, words — pick one!",
-                "Tick tock... the clock is ticking! ⏰"
+                "Don't overthink it!",
+                "Every second counts! ⏰",
+                "I know you have a word!",
+                "Go go go! 🎯",
+                "Words, words, words!",
+                "Tick tock... ⏰"
+            ],
+            checking: [
+                "Hmm, let me check... 🤔",
+                "Is that a real word?",
+                "Interesting choice...",
+                "Checking — hold on!"
             ],
             gameOver: [
-                "Great game! You were amazing! 🎉",
-                "Win or lose, you played brilliantly!",
-                "Ready for a rematch? Let's go again!",
-                "That was so fun to watch! Play again?",
-                "You're getting better every round! 📈",
-                "I'm proud of you no matter the score!"
+                "Great game! 🎉",
+                "Win or lose — you played well!",
+                "Ready for a rematch?",
+                "That was fun! Play again?",
+                "You're getting better! 📈",
+                "I'm proud of you! 🍪"
             ]
         };
 
-        let nayraTimeout = null;
+        let bubbleTimer = null;
+        let autoDialogueInterval = null;
+        let gameIsActive = false;
 
         function showNayraDialogue(event, context) {
             const bubble = document.getElementById('nayraDialogue');
             const textEl = document.getElementById('nayraText');
 
-            // Pick context based on active screen if not provided
             if (!context) {
                 if (document.getElementById('lobbyScreen').classList.contains('active')) context = 'lobby';
                 else if (document.getElementById('waitingScreen').classList.contains('active')) context = 'waiting';
@@ -1341,46 +1285,103 @@
                 else context = 'gameOver';
             }
 
-            const lines = nayraDialogues[context] || nayraDialogues.lobby;
+            const lines = mascotLines[context] || mascotLines.lobby;
             textEl.textContent = lines[Math.floor(Math.random() * lines.length)];
 
-            // Position near click / mascot
             const x = event ? event.clientX : window.innerWidth / 2;
-            const y = event ? event.clientY : 120;
-
+            const y = event ? event.clientY : 130;
             bubble.style.left = Math.min(x - 120, window.innerWidth - 260) + 'px';
-            bubble.style.top = Math.max(y - 90, 10) + 'px';
+            bubble.style.top = Math.max(y - 90, 8) + 'px';
             bubble.classList.add('show');
 
-            clearTimeout(nayraTimeout);
-            nayraTimeout = setTimeout(() => bubble.classList.remove('show'), 3200);
+            clearTimeout(bubbleTimer);
+            bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 3200);
         }
 
-        // Auto show Nayra dialogue on screen transitions
         function showNayraAuto(context) {
+            if (gameIsActive && context === 'game') return;
             setTimeout(() => {
                 const bubble = document.getElementById('nayraDialogue');
                 const textEl = document.getElementById('nayraText');
-                const lines = nayraDialogues[context] || nayraDialogues.lobby;
+                const lines = mascotLines[context] || mascotLines.lobby;
                 textEl.textContent = lines[Math.floor(Math.random() * lines.length)];
                 bubble.style.left = (window.innerWidth / 2 - 120) + 'px';
-                bubble.style.top = '120px';
+                bubble.style.top = '140px';
                 bubble.classList.add('show');
-                clearTimeout(nayraTimeout);
-                nayraTimeout = setTimeout(() => bubble.classList.remove('show'), 3200);
-            }, 600);
+                clearTimeout(bubbleTimer);
+                bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 3200);
+            }, 700);
         }
 
-        // ═══════════════════════════════════════════════
+        function startAutoDialogue(context) {
+            stopAutoDialogue();
+            showNayraAuto(context);
+            autoDialogueInterval = setInterval(() => {
+                if (!gameIsActive) showNayraAuto(context);
+            }, 5000);
+        }
+
+        function stopAutoDialogue() {
+            if (autoDialogueInterval) {
+                clearInterval(autoDialogueInterval);
+                autoDialogueInterval = null;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  DIFFICULTY BADGE
+        // ═══════════════════════════════════════════════════════
+        function setDifficultyBadge(difficulty) {
+            const badge = document.getElementById('difficultyBadge');
+            if (!badge) return;
+            badge.className = 'difficulty-badge ' + (difficulty || 'easy');
+            const icons = { easy: '🟢', medium: '🟡', hard: '🔴' };
+            const labels = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+            badge.textContent = `${icons[difficulty] || '🟢'} ${labels[difficulty] || 'Easy'}`;
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  CHECKING STATE
+        // ═══════════════════════════════════════════════════════
+        function setCheckingState(isChecking) {
+            const input = document.getElementById('wordInput');
+            const btn = document.getElementById('submitBtn');
+            if (isChecking) {
+                input.disabled = true;
+                btn.disabled = true;
+                btn.textContent = 'CHECKING...';
+                btn.classList.add('checking');
+                showNayraDialogue(null, 'checking');
+            } else {
+                input.disabled = false;
+                btn.disabled = false;
+                btn.textContent = 'GO';
+                btn.classList.remove('checking');
+                input.focus();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
         //  UTILITIES
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             window.scrollTo(0, 0);
-            // Trigger Nayra
-            const ctxMap = { lobbyScreen: 'lobby', waitingScreen: 'waiting', gameScreen: 'game', gameOverScreen: 'gameOver' };
-            if (ctxMap[id]) showNayraAuto(ctxMap[id]);
+
+            stopAutoDialogue();
+            if (id === 'gameScreen') {
+                gameIsActive = true;
+            } else {
+                gameIsActive = false;
+                const ctxMap = {
+                    lobbyScreen: 'lobby',
+                    waitingScreen: 'waiting',
+                    gameOverScreen: 'gameOver'
+                };
+                const ctx = ctxMap[id];
+                if (ctx) startAutoDialogue(ctx);
+            }
         }
 
         function showSection(id) {
@@ -1403,9 +1404,9 @@
             el._t = setTimeout(() => el.classList.remove('show'), 2200);
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  STATE
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         let socket = null;
         let currentRoomId = null;
         let myName = '';
@@ -1418,9 +1419,9 @@
         let currentRound = 0;
         let totalRoundsCount = 10;
 
-        // ═══════════════════════════════════════════════
-        //  SOCKET SETUP
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
+        //  SOCKET
+        // ═══════════════════════════════════════════════════════
         function initSocket() {
             if (socket) socket.disconnect();
             socket = io();
@@ -1468,12 +1469,22 @@
                 document.getElementById('scoreDisplay').textContent = '0';
                 document.getElementById('liveScoreboard').style.display = 'block';
                 showScreen('gameScreen');
+                setDifficultyBadge(data.difficulty || 'easy');
                 setupRound(data);
             });
 
-            socket.on('next_round', data => { setupRound(data); });
+            socket.on('next_round', data => {
+                setCheckingState(false);
+                setDifficultyBadge(data.difficulty || 'easy');
+                setupRound(data);
+            });
+
+            socket.on('checking_word', () => {
+                setCheckingState(true);
+            });
 
             socket.on('word_result', data => {
+                setCheckingState(false);
                 if (data.playerId === myId) {
                     if (data.valid) {
                         showFeedback(`✓ "${data.word}" — +${data.points} pts!`, 'correct');
@@ -1490,13 +1501,15 @@
 
             socket.on('round_won', data => {
                 clearRoundTimer();
-                showFeedback(`🏆 ${data.winnerName} got it with "${data.word}"!`, 'info');
+                setCheckingState(false);
+                showFeedback(`🏆 ${data.winnerName} got it with "${data.word}"! +${data.points} pts`, 'info');
                 if (data.scores) updateLiveScores(data.scores);
                 disableInput();
             });
 
-            socket.on('round_timeout', data => {
+            socket.on('round_timeout', () => {
                 clearRoundTimer();
+                setCheckingState(false);
                 showFeedback("⏰ Time's up!", 'wrong');
                 disableInput();
             });
@@ -1507,9 +1520,9 @@
             });
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  LOBBY ACTIONS
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         function createRoom() {
             const name = document.getElementById('createName').value.trim();
             const rounds = parseInt(document.getElementById('totalRounds').value);
@@ -1537,42 +1550,40 @@
             socket.emit('host_start', { roomId: currentRoomId });
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  WAITING ROOM
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         function updateWaitingPlayers(players) {
-            const list = document.getElementById('waitingPlayersList');
-            list.innerHTML = players.map((p, i) => `
-        <div class="player-row ${p.id === myId ? 'me' : ''}">
-          <span class="player-name">
-            ${p.name}
-            ${i === 0 ? '<span class="badge badge-host">Host</span>' : ''}
-            ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
-          </span>
-          <span style="font-size:0.82rem; color:var(--accent)">✓ Ready</span>
-        </div>
-      `).join('');
+            document.getElementById('waitingPlayersList').innerHTML = players.map((p, i) => `
+                <div class="player-row ${p.id === myId ? 'me' : ''}">
+                    <span class="player-name">
+                        ${p.name}
+                        ${i === 0 ? '<span class="badge badge-host">Host</span>' : ''}
+                        ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
+                    </span>
+                    <span style="font-size:0.82rem;color:var(--accent)">✓ Ready</span>
+                </div>
+            `).join('');
         }
 
         function checkStartButton(players) {
             const btn = document.getElementById('startGameBtn');
             const hint = document.getElementById('startHint');
-            if (isHost) {
-                if (players.length >= 2) {
-                    btn.style.display = 'flex';
-                    hint.textContent = `${players.length} player${players.length > 1 ? 's' : ''} ready — let's go!`;
-                    hint.className = 'status-msg success';
-                } else {
-                    btn.style.display = 'none';
-                    hint.textContent = 'Need at least 2 players to start';
-                    hint.className = 'status-msg';
-                }
+            if (!isHost) return;
+            if (players.length >= 2) {
+                btn.style.display = 'flex';
+                hint.textContent = `${players.length} players ready — let's go!`;
+                hint.className = 'status-msg success';
+            } else {
+                btn.style.display = 'none';
+                hint.textContent = 'Need at least 2 players to start';
+                hint.className = 'status-msg';
             }
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  GAME ROUND
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         function setupRound(data) {
             currentRound = data.roundNumber;
             currentTimerMax = data.timeLimit || 15;
@@ -1585,6 +1596,7 @@
             document.getElementById('wordInput').value = '';
             document.getElementById('feedback').className = 'feedback';
 
+            gameIsActive = true;
             enableInput();
             startRoundTimer(currentTimerMax);
         }
@@ -1612,9 +1624,11 @@
         }
 
         function enableInput() {
-            document.getElementById('wordInput').disabled = false;
-            document.getElementById('submitBtn').disabled = false;
-            document.getElementById('wordInput').focus();
+            const i = document.getElementById('wordInput');
+            const b = document.getElementById('submitBtn');
+            i.disabled = false; b.disabled = false;
+            b.textContent = 'GO'; b.classList.remove('checking');
+            i.focus();
         }
 
         function disableInput() {
@@ -1631,47 +1645,47 @@
             document.getElementById('usedWords').prepend(chip);
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  SUBMIT WORD
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('wordInput').addEventListener('keydown', e => {
                 if (e.key === 'Enter') submitWord();
             });
-            // Show Nayra greeting on load
-            showNayraAuto('lobby');
+            buildBackground();
+            startAutoDialogue('lobby');
         });
 
         function submitWord() {
             const input = document.getElementById('wordInput');
             const word = input.value.trim().toLowerCase();
-            if (!word) return;
-            if (!socket || !currentRoomId) return;
+            if (!word || !socket || !currentRoomId) return;
             input.value = '';
             socket.emit('submit_word', { roomId: currentRoomId, word });
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  LIVE SCORES
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         function updateLiveScores(scores) {
-            const list = document.getElementById('liveScoresList');
             const sorted = [...scores].sort((a, b) => b.score - a.score);
-            list.innerHTML = sorted.map((p, i) => `
-        <div class="player-row ${p.id === myId ? 'me' : ''}">
-          <span class="player-name">
-            ${i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : `${i + 1}. `}${p.name}
-            ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
-          </span>
-          <span class="player-score">${p.score}</span>
-        </div>
-      `).join('');
+            document.getElementById('liveScoresList').innerHTML = sorted.map((p, i) => `
+                <div class="player-row ${p.id === myId ? 'me' : ''}">
+                    <span class="player-name">
+                        ${i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : `${i + 1}. `}${p.name}
+                        ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
+                    </span>
+                    <span class="player-score">${p.score}</span>
+                </div>
+            `).join('');
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  GAME OVER
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         function showGameOver(data) {
+            gameIsActive = false;
+
             const myData = data.scores ? data.scores.find(p => p.id === myId) : null;
             const finalScore = myData ? myData.score : myScore;
             const winner = data.winner;
@@ -1681,28 +1695,23 @@
             document.getElementById('goTitle').textContent = iWon ? '🏆 You Win!' : 'Game Over!';
             document.getElementById('goSub').textContent = iWon
                 ? 'Congratulations, you topped the leaderboard!'
-                : `${winner ? winner.name + ' wins this round!' : 'Thanks for playing!'}`;
+                : (winner ? `${winner.name} wins this round!` : 'Thanks for playing!');
 
-            const maxScore = totalRoundsCount * 100;
-            const pct = finalScore / maxScore;
+            const pct = finalScore / (totalRoundsCount * 100);
             document.getElementById('starRating').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
-
-            // Nayra expression
-            const mouth = document.getElementById('goMouth');
-            mouth.setAttribute('d', iWon ? 'M44 64 Q55 78 66 64' : 'M44 72 Q55 64 66 72');
 
             if (data.scores && data.scores.length > 1) {
                 document.getElementById('finalScoreboard').style.display = 'block';
                 const sorted = [...data.scores].sort((a, b) => b.score - a.score);
                 document.getElementById('finalScoresList').innerHTML = sorted.map((p, i) => `
-          <div class="player-row ${p.id === myId ? 'me' : ''} ${i === 0 ? 'winner-row' : ''}">
-            <span class="player-name">
-              ${i === 0 ? '🏆 ' : `${i + 1}. `}${p.name}
-              ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
-            </span>
-            <span class="player-score">${p.score}</span>
-          </div>
-        `).join('');
+                    <div class="player-row ${p.id === myId ? 'me' : ''} ${i === 0 ? 'winner-row' : ''}">
+                        <span class="player-name">
+                            ${i === 0 ? '🏆 ' : `${i + 1}. `}${p.name}
+                            ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
+                        </span>
+                        <span class="player-score">${p.score}</span>
+                    </div>
+                `).join('');
             }
 
             if (data.hint) {
@@ -1713,9 +1722,9 @@
             showScreen('gameOverScreen');
         }
 
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         //  NAVIGATION
-        // ═══════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════
         function playAgain() {
             if (isHost && socket && currentRoomId) {
                 socket.emit('host_start', { roomId: currentRoomId });
@@ -1727,13 +1736,10 @@
 
         function goToLobby() {
             if (socket) { socket.disconnect(); socket = null; }
-            currentRoomId = null;
-            isHost = false;
-            myScore = 0;
-            document.getElementById('createSection').style.display = 'none';
-            document.getElementById('joinSection').style.display = 'none';
-            document.getElementById('createStatus').textContent = '';
-            document.getElementById('joinStatus').textContent = '';
+            currentRoomId = null; isHost = false; myScore = 0;
+            gameIsActive = false;
+            ['createSection', 'joinSection'].forEach(id => document.getElementById(id).style.display = 'none');
+            ['createStatus', 'joinStatus'].forEach(id => document.getElementById(id).textContent = '');
             document.getElementById('finalScoreboard').style.display = 'none';
             document.getElementById('hintBox').style.display = 'none';
             document.getElementById('liveScoreboard').style.display = 'none';
