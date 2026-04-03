@@ -41,28 +41,9 @@ app.get('/{*path}', (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  API WORD CACHE
-//  Stores words confirmed valid by the dictionary API this session
-//  so repeat words don't hit the API again
+//  DICTIONARY CACHE
+//  using local trie loaded from words.txt so no API checks needed
 // ═══════════════════════════════════════════════════════════════
-const apiWordCache = new Set();
-
-// Tracks players currently awaiting an API check
-// Prevents spam submissions while a check is in progress
-const pendingApiCheck = new Set();
-
-async function checkWordWithApi(word) {
-    try {
-        const fetch = (await import('node-fetch')).default;
-        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        if (!res.ok) return false;
-        const data = await res.json();
-        return Array.isArray(data) && data.length > 0;
-    } catch (err) {
-        console.error(`[API] Dictionary check failed for "${word}":`, err.message);
-        return false;
-    }
-}
 
 // ═══════════════════════════════════════════════════════════════
 //  SOCKET EVENTS
@@ -71,13 +52,13 @@ io.on('connection', (socket) => {
     console.log(`[+] Connected   : ${socket.id}`);
 
     // ── CREATE ROOM ──────────────────────────────────────────────
-    socket.on('create_room', ({ playerName, totalRounds = 10 }) => {
+    socket.on('create_room', ({ playerName, avatar, totalRounds = 10, isSinglePlayer = false, gameMode = 'single', timeLimit = 15, maxPlayers = 6 }) => {
         if (!playerName || !playerName.trim()) {
             socket.emit('error_msg', 'Please enter a name!');
             return;
         }
 
-        const roomId = createRoom(socket.id, playerName.trim(), totalRounds);
+        const roomId = createRoom(socket.id, playerName.trim(), totalRounds, isSinglePlayer, gameMode, timeLimit, maxPlayers, avatar);
         socket.join(roomId);
 
         console.log(`[R] Room created: ${roomId} by ${playerName}`);
@@ -89,7 +70,7 @@ io.on('connection', (socket) => {
     });
 
     // ── JOIN ROOM ────────────────────────────────────────────────
-    socket.on('join_room', ({ roomId, playerName }) => {
+    socket.on('join_room', ({ roomId, playerName, avatar }) => {
         if (!playerName || !playerName.trim()) {
             socket.emit('error_msg', 'Please enter a name!');
             return;
@@ -99,7 +80,7 @@ io.on('connection', (socket) => {
             return;
         }
 
-        const result = joinRoom(roomId.toUpperCase(), socket.id, playerName.trim());
+        const result = joinRoom(roomId.toUpperCase(), socket.id, playerName.trim(), avatar);
 
         if (result.error) {
             socket.emit('error_msg', result.error);
@@ -142,168 +123,129 @@ io.on('connection', (socket) => {
     });
 
     // ── SUBMIT WORD ──────────────────────────────────────────────
-    socket.on('submit_word', async ({ roomId, word }) => {
+    socket.on('submit_word', ({ roomId, word }) => {
         if (!roomId || !word) return;
-
-        // Block spam submissions while API check is in progress
-        if (pendingApiCheck.has(socket.id)) return;
 
         const result = submitWord(roomId, socket.id, word);
 
-        // Hard errors (room not found, no active round, etc.)
         if (result.error) {
             socket.emit('error_msg', result.error);
             return;
         }
 
-        // Soft invalid — check if the reason is "NOT IN WORD LIST"
-        // If so, try the dictionary API as a fallback
         if (result.invalid) {
-            const w = word.toLowerCase().trim();
-            const isNotInList = result.invalid.includes('NOT IN WORD LIST');
-
-            if (isNotInList) {
-                // Check if we already confirmed this word via API this session
-                if (apiWordCache.has(w)) {
-                    // Word is API-confirmed, inject it into the word list and resubmit
-                    const { WORD_LIST } = require('./wordList');
-                    WORD_LIST.add(w);
-                    const retryResult = submitWord(roomId, socket.id, word);
-                    handleSubmitResult(retryResult, roomId, socket, word);
-                    return;
-                }
-
-                // Lock this player from submitting again until check is done
-                pendingApiCheck.add(socket.id);
-                socket.emit('checking_word', { word: w.toUpperCase() });
-
-                console.log(`[API] Checking "${w}" via dictionary API...`);
-                const isValid = await checkWordWithApi(w);
-
-                pendingApiCheck.delete(socket.id);
-
-                if (isValid) {
-                    // Cache it and add to the live word list
-                    apiWordCache.add(w);
-                    const { WORD_LIST } = require('./wordList');
-                    WORD_LIST.add(w);
-
-                    console.log(`[API] "${w}" confirmed valid — added to session cache`);
-
-                    const retryResult = submitWord(roomId, socket.id, word);
-                    handleSubmitResult(retryResult, roomId, socket, word);
-                } else {
-                    console.log(`[API] "${w}" rejected by dictionary API`);
-                    socket.emit('word_result', {
-                        playerId: socket.id,
-                        valid: false,
-                        word: w.toUpperCase(),
-                        reason: result.invalid,
-                        scores: getRoomSafely(roomId)?.players.map(p => ({
-                            id: p.id,
-                            name: p.name,
-                            score: p.score,
-                        })) || [],
-                    });
-                }
-                return;
-            }
-
-            // Any other invalid reason (wrong letters, already used, too short)
             socket.emit('word_result', {
                 playerId: socket.id,
                 valid: false,
                 word: word.toUpperCase(),
                 reason: result.invalid,
-                scores: getRoomSafely(roomId)?.players.map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    score: p.score,
-                })) || [],
+                scores: getRoomSafely(roomId)?.players.map(p => ({ id: p.id, name: p.name, score: p.score })) || [],
             });
             return;
         }
 
-        if (result.won) {
-            handleSubmitResult(result, roomId, socket, word);
+        if (result.normalWin) {
+            handleNormalRoundComplete(result, roomId);
+            return;
         }
+
+        if (result.limitlessValid) {
+            socket.emit('word_result', {
+                playerId: socket.id,
+                valid: true,
+                word: result.word,
+                points: result.pointsAwarded,
+                scores: result.scores,
+            });
+            // Also notify others so they see the live score update and the word history
+            socket.to(roomId).emit('player_scored', {
+                playerId: socket.id,
+                word: result.word,
+                points: result.pointsAwarded,
+                scores: result.scores
+            });
+            return;
+        }
+
+        if (result.waitingForOthers) {
+            socket.emit('word_result', {
+                playerId: socket.id,
+                valid: true,
+                waiting: true,
+                word: result.word,
+            });
+            return;
+        }
+
+        if (result.singleRoundComplete) {
+            handleSingleRoundComplete(result, roomId);
+            return;
+        }
+    });
+
+    // ── CHAT MESSAGES ──────────────────────────────────────────────
+    socket.on('chat_msg', ({ roomId, msg, senderName, avatar }) => {
+        if (!roomId || !msg) return;
+        io.to(roomId).emit('chat_msg', { senderName, avatar, msg, timestamp: Date.now() });
     });
 
     // ── DISCONNECT ───────────────────────────────────────────────
     socket.on('disconnect', () => {
         console.log(`[-] Disconnected: ${socket.id}`);
-        pendingApiCheck.delete(socket.id);
         handlePlayerDisconnect(socket.id);
     });
 });
 
+function handleNormalRoundComplete(result, roomId) {
+    const room = getRoom(roomId);
+    if (room) clearRoomTimer(room);
+
+    io.to(roomId).emit('round_complete_normal', result);
+
+    setTimeout(() => {
+        if (isGameOver(roomId)) endGame(roomId);
+        else startNextRound(roomId);
+    }, 4000);
+}
+
 // ═══════════════════════════════════════════════════════════════
-//  HANDLE SUBMIT RESULT
-//  Shared logic for both direct wins and API-confirmed wins
+//  HANDLE SINGLE ROUND COMPLETE
 // ═══════════════════════════════════════════════════════════════
-function handleSubmitResult(result, roomId, socket, word) {
-    if (result.error) {
-        socket.emit('error_msg', result.error);
-        return;
-    }
+function handleSingleRoundComplete(result, roomId) {
+    const room = getRoom(roomId);
+    if (room) clearRoomTimer(room);
 
-    if (result.invalid) {
-        socket.emit('word_result', {
-            playerId: socket.id,
-            valid: false,
-            word: word.toUpperCase(),
-            reason: result.invalid,
-            scores: getRoomSafely(roomId)?.players.map(p => ({
-                id: p.id,
-                name: p.name,
-                score: p.score,
-            })) || [],
-        });
-        return;
-    }
+    io.to(roomId).emit('round_complete', result);
 
-    if (result.won) {
-        const room = getRoom(roomId);
-        if (room) clearRoomTimer(room);
-
-        console.log(`[W] ${result.winnerName} won round with "${result.word}" in room ${roomId} (+${result.pointsAwarded}pts)`);
-
-        socket.emit('word_result', {
-            playerId: socket.id,
-            valid: true,
-            word: result.word,
-            points: result.pointsAwarded,
-            scores: result.scores,
-        });
-
-        io.to(roomId).emit('round_won', {
-            winnerId: result.winnerId,
-            winnerName: result.winnerName,
-            word: result.word,
-            points: result.pointsAwarded,
-            scores: result.scores,
-        });
-
-        setTimeout(() => {
-            if (isGameOver(roomId)) {
-                endGame(roomId);
-            } else {
-                startNextRound(roomId);
-            }
-        }, BETWEEN_ROUND);
-    }
+    setTimeout(() => {
+        if (isGameOver(roomId)) {
+            endGame(roomId);
+        } else {
+            startNextRound(roomId);
+        }
+    }, 4000);
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  ROUND TIMER
 // ═══════════════════════════════════════════════════════════════
 function scheduleRoundTimer(roomId) {
+    const room = getRoomSafely(roomId);
+    const timeLimit = room ? room.timeLimit : 15;
+
     setRoomTimer(roomId, () => {
         const result = handleRoundTimeout(roomId);
         if (!result) return;
 
         console.log(`[T] Round timed out in room ${roomId}`);
-        io.to(roomId).emit('round_timeout', result);
+
+        if (result.limitlessFinish) {
+            io.to(roomId).emit('round_timeout', result);
+        } else if (result.timeoutNormal) {
+            io.to(roomId).emit('round_timeout', result);
+        } else if (result.singleRoundComplete) {
+            io.to(roomId).emit('round_complete', result);
+        }
 
         setTimeout(() => {
             if (isGameOver(roomId)) {
@@ -311,9 +253,9 @@ function scheduleRoundTimer(roomId) {
             } else {
                 startNextRound(roomId);
             }
-        }, BETWEEN_ROUND);
+        }, 4000);
 
-    }, ROUND_TIME * 1000);
+    }, timeLimit * 1000);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -355,6 +297,7 @@ function endGame(roomId) {
         winner: results.winner,
         scores: results.players.map(p => ({ id: p.id, name: p.name, score: p.score })),
         hint,
+        playerHistory: results.playerHistory
     };
 
     console.log(`[E] Game over   : ${roomId} | Winner: ${results.winner?.name}`);
@@ -386,9 +329,9 @@ function handlePlayerDisconnect(socketId) {
 
     if (safeRoom && safeRoom.state === 'playing') {
         const activePlayers = safeRoom.players.filter(p => p.active);
-        if (activePlayers.length < 2) {
-            const room = getRoom(roomId);
-            if (room) clearRoomTimer(room);
+        const room = getRoom(roomId);
+        if (room && !room.isSinglePlayer && activePlayers.length < 2) {
+            clearRoomTimer(room);
             endGame(roomId);
         }
     }
@@ -406,3 +349,11 @@ server.listen(PORT, () => {
     console.log(`  ╚═════╝ ╚═╝  ╚═╝╚═╝╚═════╝  ╚═════╝ ╚══════╝`);
     console.log(`\n  Server running on http://localhost:${PORT}\n`);
 });
+
+// Graceful shutdown — release port on restart/watch reload
+function gracefulShutdown() {
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(1), 2000);
+}
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
