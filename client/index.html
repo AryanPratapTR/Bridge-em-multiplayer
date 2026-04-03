@@ -36,9 +36,38 @@
             --success: #7a9e7e;
             --error: #c97d5b;
             --radius: 20px;
-            --radius-sm: 14px;
             --shadow: 0 2px 16px rgba(181, 131, 110, 0.10);
             --shadow-card: 0 2px 10px rgba(181, 131, 110, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --primary: #c99c89;
+            --primary-dark: #a97f6c;
+            --primary-light: #3d2b24;
+            --secondary: #e59a7a;
+            --secondary-light: #4a3024;
+            --accent: #93b997;
+            --accent-light: #2c3a2e;
+            --accent2: #e0be82;
+            --accent2-light: #3a3222;
+            --bg: #1a1614;
+            --bg2: #241d1a;
+            --card: #2c2420;
+            --card2: #332b26;
+            --border: #443731;
+            --text: #f0e6e0;
+            --text-muted: #b59f93;
+            --success: #93b997;
+            --error: #e59a7a;
+            --shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+            --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .mascot-video,
+        [data-theme="dark"] .mascot-video-sm {
+            mix-blend-mode: screen;
+            filter: invert(1) hue-rotate(180deg) brightness(0.85);
+            border-radius: 12px;
         }
 
         html,
@@ -388,6 +417,11 @@
             font-weight: 600;
         }
 
+        [data-theme="dark"] .input option {
+            background: var(--card);
+            color: var(--text);
+        }
+
         .room-code-badge {
             display: inline-flex;
             align-items: center;
@@ -579,7 +613,7 @@
             height: 100%;
             border-radius: 50px;
             background: var(--accent);
-            transition: width 1s linear, background 0.5s;
+            transition: background 0.5s;
         }
 
         .timer-fill.warning {
@@ -943,15 +977,24 @@
             }
         }
 
-        @media (max-width: 400px) {
+        @media (max-width: 480px) {
+            .screen {
+                max-width: 95%;
+            }
+
+            .btn-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
             .logo-title {
                 font-size: 1.9rem;
             }
 
             .letter-tile {
-                width: 72px;
-                height: 72px;
-                font-size: 2rem;
+                width: 64px;
+                height: 64px;
+                font-size: 1.8rem;
             }
 
             .card {
@@ -962,6 +1005,42 @@
                 padding: 11px 18px;
             }
         }
+
+        /* ── AVATARS ── */
+        .avatar-select { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; justify-content: center; }
+        .avatar-emoji { font-size: 1.4rem; cursor: pointer; padding: 4px; border-radius: 50%; border: 2px solid transparent; transition: 0.15s; background: var(--card2); }
+        .avatar-emoji.selected { border-color: var(--primary); background: var(--primary-light); transform: scale(1.15); box-shadow: var(--shadow-card); }
+
+        /* ── LAYOUT GRID ── */
+        .main-layout { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 15px; }
+        @media (min-width: 950px) {
+            .main-layout { flex-direction: row; align-items: flex-start; justify-content: center; gap: 20px; max-width: 1300px; margin: 0 auto; padding-top: 40px; }
+            .screen { max-width: 550px; min-width: 400px; margin-top: 0; }
+        }
+        .side-panel { display: none; flex-direction: column; width: 100%; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 15px; box-shadow: var(--shadow-card); margin-bottom: 20px; }
+        .main-layout.is-game .side-panel { display: flex; }
+        @media (min-width: 950px) {
+            .side-panel { width: 300px; margin-top: 0; max-height: 85vh; margin-bottom: 0; }
+        }
+
+        /* ── CHAT ── */
+        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; max-height: 300px; }
+        @media (min-width: 950px) { .chat-messages { max-height: none; } }
+        .chat-msg { background: var(--bg2); padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; word-break: break-word; width: fit-content; max-width: 90%; }
+        .chat-msg.me { align-self: flex-end; background: var(--primary-light); border: 1.5px solid var(--primary); }
+        .chat-msg-name { font-size: 0.65rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+        .chat-input-row { display: flex; gap: 8px; }
+        .chat-input-row .input { padding: 8px 12px; font-size: 0.85rem;border-radius: 20px; }
+        .chat-btn { background: var(--primary); color: #fff; border:none; border-radius: 20px; padding: 0 12px; font-weight: 800; cursor: pointer; }
+
+        /* ── RULES MODAL ── */
+        .rules-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .rules-modal.show { display: flex; }
+        .rules-content { background: var(--card); width: 90%; max-width: 450px; border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); position: relative; max-height: 90vh; overflow-y: auto; }
+        .rules-close { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+        .rules-content h3 { color: var(--text); margin-bottom: 10px; font-size: 1.2rem; }
+        .rules-content p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px; line-height: 1.4; }
+        .rules-content ul { margin-left: 20px; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px; }
 
         ::-webkit-scrollbar {
             width: 4px;
@@ -983,12 +1062,88 @@
 
     <div id="bgCanvas"></div>
 
+    <button class="theme-toggle" onclick="toggleTheme()"
+        style="position:fixed; top:20px; right:20px; z-index:100; font-size:24px; background:var(--card); border:1px solid var(--border); border-radius:50%; width:45px; height:45px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);">🌙</button>
+
+    <button class="rules-toggle" onclick="toggleSettings('rulesModal')"
+        style="position:fixed; top:20px; right:75px; z-index:100; font-size:20px; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:50%; width:45px; height:45px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);">ℹ️</button>
+
+    <!-- RULES MODAL -->
+    <div class="rules-modal" id="rulesModal">
+        <div class="rules-content">
+            <span class="rules-close" onclick="toggleSettings('rulesModal')">&times;</span>
+            <h3>How to Play Bridge-Em</h3>
+            <p>Connect the starting letter to the ending letter with a valid English word!</p>
+            <h3>🏆 Scoring</h3>
+            <ul>
+                <li><strong>4 letters:</strong> 5 points</li>
+                <li><strong>5 letters:</strong> 7 points</li>
+                <li><strong>6 letters:</strong> 9 points</li>
+                <li><strong>7 letters:</strong> 11 points</li>
+                <li><strong>8 letters:</strong> 13 points</li>
+                <li><strong>9+ letters:</strong> 15 points (Max!)</li>
+            </ul>
+            <h3>🎮 Game Modes</h3>
+            <ul>
+                <li><strong>Limitless:</strong> Submit as many correct words as you want before time runs out!</li>
+                <li><strong>Single Word (Speed):</strong> Everyone submits one word. The fastest players get large speed bonus multipliers!</li>
+                <li><strong>Normal:</strong> Cutthroat! The round ends the moment the <em>first</em> person submits a valid word. Play fast!</li>
+            </ul>
+            <h3>📏 Levels</h3>
+            <p>Difficulty auto-scales based on mathematically how many words actually exist for the pair. Prepare for Level 5!</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            document.querySelector('.theme-toggle').textContent = target === 'dark' ? '☀️' : '🌙';
+        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        window.addEventListener('DOMContentLoaded', () => {
+            const btn = document.querySelector('.theme-toggle');
+            if (btn) btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+            // Cache player name logic
+            const savedName = localStorage.getItem('playerName') || '';
+            ['createName', 'joinName', 'soloName'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = savedName;
+            });
+        });
+        
+        function toggleSettings(id) {
+            const el = document.getElementById(id);
+            if(el.style.display === 'none') { el.style.display = 'block'; }
+            else { el.style.display = 'none'; }
+        }
+    </script>
+
     <div class="nayra-bubble" id="nayraDialogue">
         <div class="nayra-name">Nayra says</div>
         <div id="nayraText">Hi there! 👋</div>
     </div>
 
     <div class="app">
+        <div class="main-layout" id="mainLayout">
+
+            <!-- LEFT SIDEBAR: CHAT -->
+            <div class="side-panel chat-panel" id="chatPanel">
+                <div class="section-title" style="margin-bottom:0px;text-align:left;">💬 Room Chat</div>
+                <div class="divider" style="margin: 8px 0;"></div>
+                <div class="chat-messages" id="chatList"></div>
+                <div class="chat-input-row" id="chatInputArea" style="opacity:0.4;pointer-events:none;">
+                    <input class="input" id="chatInput" placeholder="Aa..." autocomplete="off">
+                    <button class="chat-btn" onclick="sendChat()">Send</button>
+                </div>
+            </div>
+
+            <!-- SCREENS CENTER -->
+            <div class="screens-wrapper" style="width:100%; display:flex; flex-direction:column; align-items:center;">
 
         <!-- ═══════════════ LOBBY ═══════════════ -->
         <div class="screen active" id="lobbyScreen">
@@ -1005,21 +1160,99 @@
 
             <div class="card" style="margin-top:18px;">
                 <div class="btn-row">
-                    <button class="btn btn-primary" onclick="showSection('createSection')">✦ Create Room</button>
-                    <button class="btn btn-secondary" onclick="showSection('joinSection')">→ Join Room</button>
+                    <button class="btn btn-primary" onclick="showSection('createSection')">✦ Create</button>
+                    <button class="btn btn-secondary" onclick="showSection('joinSection')">→ Join</button>
+                    <button class="btn btn-accent" onclick="showSection('soloSection')"
+                        style="background:var(--accent);color:#fff;">👤 Solo</button>
+                </div>
+
+                <div id="soloSection" style="display:none;">
+                    <div class="divider"></div>
+                    <div class="section-title">Play Solo</div>
+                    <div class="input-group">
+                        <label>Avatar</label>
+                        <div class="avatar-select" id="avListSolo">
+                            <span class="avatar-emoji selected" onclick="selAv('Solo', '🦊')">🦊</span>
+                            <span class="avatar-emoji" onclick="selAv('Solo', '🐯')">🐯</span>
+                            <span class="avatar-emoji" onclick="selAv('Solo', '🐼')">🐼</span>
+                            <span class="avatar-emoji" onclick="selAv('Solo', '🐸')">🐸</span>
+                            <span class="avatar-emoji" onclick="selAv('Solo', '🐶')">🐶</span>
+                            <span class="avatar-emoji" onclick="selAv('Solo', '🐱')">🐱</span>
+                        </div>
+                        <input type="hidden" id="avValSolo" value="🦊" />
+                    </div>
+                    <div class="input-group">
+                        <label>Your Name</label>
+                        <input class="input" id="soloName" placeholder="e.g. Solo hero" maxlength="16" />
+                    </div>
+                    <div class="input-group">
+                        <label>Number of Rounds</label>
+                        <input class="input" id="soloRounds" type="number" placeholder="Default: 10" min="1" max="30" />
+                    </div>
+                    <div style="text-align: right; margin-bottom: 8px;">
+                        <span style="cursor:pointer; font-size: 0.9rem; opacity: 0.8;" onclick="toggleSettings('soloSettings')">⚙️ Settings</span>
+                    </div>
+                    <div id="soloSettings" style="display:none; margin-bottom: 15px; border-left: 2px solid var(--accent); padding-left: 10px;">
+                        <div class="input-group">
+                            <label>Game Mode</label>
+                            <select class="input" id="soloMode">
+                                <option value="limitless">Limitless (Most words wins)</option>
+                                <option value="single" selected>Single Word (Speed ranked)</option>
+                                <option value="normal">Normal (First to answer wins)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Time Limit (s)</label>
+                            <input class="input" id="soloTimeLimit" type="number" placeholder="Default: 15" min="5" max="120" />
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="createSoloRoom()">Start Solo Game</button>
+                    <div class="status-msg" id="soloStatus"></div>
                 </div>
 
                 <div id="createSection" style="display:none;">
                     <div class="divider"></div>
                     <div class="section-title">Create a Room</div>
                     <div class="input-group">
+                        <label>Avatar</label>
+                        <div class="avatar-select" id="avListCreate">
+                            <span class="avatar-emoji selected" onclick="selAv('Create', '🦊')">🦊</span>
+                            <span class="avatar-emoji" onclick="selAv('Create', '🐯')">🐯</span>
+                            <span class="avatar-emoji" onclick="selAv('Create', '🐼')">🐼</span>
+                            <span class="avatar-emoji" onclick="selAv('Create', '🐸')">🐸</span>
+                            <span class="avatar-emoji" onclick="selAv('Create', '🐶')">🐶</span>
+                            <span class="avatar-emoji" onclick="selAv('Create', '🐱')">🐱</span>
+                        </div>
+                        <input type="hidden" id="avValCreate" value="🦊" />
+                    </div>
+                    <div class="input-group">
                         <label>Your Name</label>
                         <input class="input" id="createName" placeholder="e.g. Alex" maxlength="16" />
                     </div>
                     <div class="input-group">
                         <label>Number of Rounds</label>
-                        <input class="input" id="totalRounds" type="number" placeholder="Default: 10" min="1"
-                            max="30" />
+                        <input class="input" id="totalRounds" type="number" placeholder="Default: 10" min="1" max="30" />
+                    </div>
+                    <div style="text-align: right; margin-bottom: 8px;">
+                        <span style="cursor:pointer; font-size: 0.9rem; opacity: 0.8;" onclick="toggleSettings('createSettings')">⚙️ Settings</span>
+                    </div>
+                    <div id="createSettings" style="display:none; margin-bottom: 15px; border-left: 2px solid var(--accent); padding-left: 10px;">
+                        <div class="input-group">
+                            <label>Game Mode</label>
+                            <select class="input" id="gameMode">
+                                <option value="limitless">Limitless (Most words wins)</option>
+                                <option value="single" selected>Single Word (Speed ranked)</option>
+                                <option value="normal">Normal (First to answer wins)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Time Limit (s)</label>
+                            <input class="input" id="timeLimit" type="number" placeholder="Default: 15" min="5" max="120" />
+                        </div>
+                        <div class="input-group">
+                            <label>Max Players</label>
+                            <input class="input" id="maxPlayers" type="number" placeholder="Default: 6" min="2" max="10" />
+                        </div>
                     </div>
                     <button class="btn btn-success" onclick="createRoom()">Create &amp; Start</button>
                     <div class="status-msg" id="createStatus"></div>
@@ -1028,6 +1261,18 @@
                 <div id="joinSection" style="display:none;">
                     <div class="divider"></div>
                     <div class="section-title">Join a Room</div>
+                    <div class="input-group">
+                        <label>Avatar</label>
+                        <div class="avatar-select" id="avListJoin">
+                            <span class="avatar-emoji selected" onclick="selAv('Join', '🦊')">🦊</span>
+                            <span class="avatar-emoji" onclick="selAv('Join', '🐯')">🐯</span>
+                            <span class="avatar-emoji" onclick="selAv('Join', '🐼')">🐼</span>
+                            <span class="avatar-emoji" onclick="selAv('Join', '🐸')">🐸</span>
+                            <span class="avatar-emoji" onclick="selAv('Join', '🐶')">🐶</span>
+                            <span class="avatar-emoji" onclick="selAv('Join', '🐱')">🐱</span>
+                        </div>
+                        <input type="hidden" id="avValJoin" value="🦊" />
+                    </div>
                     <div class="input-group">
                         <label>Room Code</label>
                         <input class="input" id="joinRoomCode" placeholder="e.g. AB12CD" maxlength="6"
@@ -1073,9 +1318,10 @@
 
         <!-- ═══════════════ GAME SCREEN ═══════════════ -->
         <div class="screen" id="gameScreen">
-
-            <div class="hud">
-                <div class="hud-chip">
+            <div class="logo-title" style="font-size: 2rem; margin-bottom: 20px;">Bridge - Em</div>
+            <div class="playing-box" style="background:var(--card); border: 2px solid var(--border); box-shadow:var(--shadow-card); border-radius:var(--radius); padding:20px; width:100%; display:flex; flex-direction:column; align-items:center;">
+                <div class="hud" style="width: 100%;">
+                    <div class="hud-chip">
                     <span class="hud-chip-label">Score</span>
                     <span class="hud-chip-val accent" id="scoreDisplay">0</span>
                 </div>
@@ -1124,15 +1370,9 @@
 
             <div class="feedback" id="feedback"></div>
 
-            <div class="scoreboard" id="liveScoreboard" style="display:none;">
-                <div class="scoreboard-title">Live Scores</div>
-                <div id="liveScoresList"></div>
-            </div>
-
-            <div class="used-section">
-                <div class="used-label">Used Words</div>
-                <div class="used-chips" id="usedWords"></div>
-            </div>
+            <!-- Moved to sidebar -->
+            
+            </div> <!-- End playing-box -->
         </div>
 
         <!-- ═══════════════ GAME OVER ═══════════════ -->
@@ -1154,6 +1394,10 @@
                     <div class="divider"></div>
                     <div class="scoreboard-title">Final Standings</div>
                     <div id="finalScoresList"></div>
+                    
+                    <div class="divider"></div>
+                    <div class="scoreboard-title">Player History</div>
+                    <div id="playerHistoryList" style="text-align: left; font-size: 0.9rem; padding: 10px;"></div>
                 </div>
 
                 <div class="hint-box" id="hintBox" style="display:none;">
@@ -1172,7 +1416,29 @@
             </div>
         </div>
 
-    </div>
+            </div> <!-- End screens-wrapper -->
+            
+            <!-- RIGHT SIDEBAR: HISTORY & SCORES -->
+            <div class="side-panel history-panel" id="historyPanel">
+                <div class="scoreboard" id="liveScoreboard">
+                    <div class="section-title" style="margin-bottom:0px;text-align:left;">🏆 Live Scores</div>
+                    <div class="divider" style="margin: 8px 0;"></div>
+                    <div id="liveScoresList">
+                         <div style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:15px;">Waiting for players...</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;"></div>
+
+                <div class="used-section">
+                    <div class="section-title" style="margin-bottom:0px;text-align:left;">🕰️ Used Words</div>
+                    <div class="divider" style="margin: 8px 0;"></div>
+                    <div class="used-chips" id="usedWords"></div>
+                </div>
+            </div>
+
+        </div> <!-- End main-layout -->
+    </div> <!-- End app -->
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -1334,10 +1600,11 @@
         function setDifficultyBadge(difficulty) {
             const badge = document.getElementById('difficultyBadge');
             if (!badge) return;
-            badge.className = 'difficulty-badge ' + (difficulty || 'easy');
-            const icons = { easy: '🟢', medium: '🟡', hard: '🔴' };
-            const labels = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
-            badge.textContent = `${icons[difficulty] || '🟢'} ${labels[difficulty] || 'Easy'}`;
+            const tier = parseInt(difficulty) || 1;
+            const icons = { 1: '🟢', 2: '🟡', 3: '🟠', 4: '🔴', 5: '💀' };
+            const colors = { 1: 'easy', 2: 'easy', 3: 'medium', 4: 'hard', 5: 'hard' };
+            badge.className = 'difficulty-badge ' + (colors[tier] || 'easy');
+            badge.textContent = `${icons[tier] || '🟢'} Level ${tier}`;
         }
 
         // ═══════════════════════════════════════════════════════
@@ -1385,8 +1652,22 @@
         }
 
         function showSection(id) {
-            ['createSection', 'joinSection'].forEach(s => {
-                document.getElementById(s).style.display = s === id ? 'block' : 'none';
+            ['createSection', 'joinSection', 'soloSection'].forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.style.display = s === id ? 'block' : 'none';
+            });
+        }
+
+        function createSoloRoom() {
+            const name = document.getElementById('soloName').value.trim();
+            const rounds = parseInt(document.getElementById('soloRounds').value);
+            if (!name) { setStatus('soloStatus', 'Please enter your name', 'error'); return; }
+            myName = name;
+            initSocket();
+            socket.emit('create_room', {
+                playerName: name,
+                totalRounds: isNaN(rounds) ? 10 : Math.min(Math.max(rounds, 1), 30),
+                isSinglePlayer: true
             });
         }
 
@@ -1405,13 +1686,29 @@
         }
 
         // ═══════════════════════════════════════════════════════
-        //  STATE
+        //  STATE & HELPERS
         // ═══════════════════════════════════════════════════════
         let socket = null;
         let currentRoomId = null;
         let myName = '';
+        let myAvatar = '🦊';
         let myId = null;
         let isHost = false;
+
+        function selAv(type, emoji) {
+            document.getElementById(`avVal${type}`).value = emoji;
+            const container = document.getElementById(`avList${type}`);
+            container.querySelectorAll('.avatar-emoji').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function sendChat() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg || !currentRoomId || !socket) return;
+            socket.emit('chat_msg', { roomId: currentRoomId, msg, senderName: myName, avatar: myAvatar });
+            input.value = '';
+        }
         let roundTimer = null;
         let currentTimerMax = 15;
         let usedWordsSet = new Set();
@@ -1437,9 +1734,13 @@
             socket.on('room_created', data => {
                 currentRoomId = data.roomId;
                 isHost = true;
-                document.getElementById('roomCodeDisplay').textContent = data.roomId;
-                showScreen('waitingScreen');
-                updateWaitingPlayers(data.room.players);
+                if (data.room.isSinglePlayer) {
+                    socket.emit('host_start', { roomId: currentRoomId });
+                } else {
+                    document.getElementById('roomCodeDisplay').textContent = data.roomId;
+                    showScreen('waitingScreen');
+                    updateWaitingPlayers(data.room.players);
+                }
             });
 
             socket.on('room_joined', data => {
@@ -1468,14 +1769,39 @@
                 usedWordsSet = new Set();
                 document.getElementById('scoreDisplay').textContent = '0';
                 document.getElementById('liveScoreboard').style.display = 'block';
+                document.getElementById('chatInputArea').style.opacity = '1';
+                document.getElementById('chatInputArea').style.pointerEvents = 'auto';
+                document.querySelector('.main-layout').classList.add('is-game');
+                
                 showScreen('gameScreen');
-                setDifficultyBadge(data.difficulty || 'easy');
+                setDifficultyBadge(data.difficulty || 1);
                 setupRound(data);
+            });
+
+            socket.on('chat_msg', data => {
+                const list = document.getElementById('chatList');
+                const isMe = data.senderName === myName;
+                const div = document.createElement('div');
+                div.className = `chat-msg ${isMe ? 'me' : ''}`;
+                div.innerHTML = `<div class="chat-msg-name">${data.avatar} ${data.senderName}</div><div>${data.msg}</div>`;
+                list.appendChild(div);
+                list.scrollTop = list.scrollHeight;
+            });
+
+            socket.on('round_complete_normal', data => {
+                clearRoundTimer();
+                setCheckingState(false);
+                let msg = `⏰ Round Over!`;
+                if(data.winnerName) msg = `🏆 ${data.winnerName} instantly won with "${data.word}"!`;
+                if(data.hint) msg += `<br><span style="font-size:0.9rem;opacity:0.9">💡 Possible answer: <b>${data.hint}</b></span>`;
+                showFeedback(msg, 'info', true);
+                if (data.scores) updateLiveScores(data.scores);
+                disableInput();
             });
 
             socket.on('next_round', data => {
                 setCheckingState(false);
-                setDifficultyBadge(data.difficulty || 'easy');
+                setDifficultyBadge(data.difficulty || 1);
                 setupRound(data);
             });
 
@@ -1487,6 +1813,11 @@
                 setCheckingState(false);
                 if (data.playerId === myId) {
                     if (data.valid) {
+                        if (data.waiting) {
+                             showFeedback(`✓ Word accepted! Waiting for others...`, 'info');
+                             disableInput();
+                             return;
+                        }
                         showFeedback(`✓ "${data.word}" — +${data.points} pts!`, 'correct');
                         myScore += data.points;
                         document.getElementById('scoreDisplay').textContent = myScore;
@@ -1498,19 +1829,35 @@
                 }
                 if (data.scores) updateLiveScores(data.scores);
             });
+            
+            socket.on('player_scored', data => {
+                if (data.playerId !== myId) {
+                     showFeedback(`Someone bridged "${data.word}" for +${data.points} pts!`, 'info');
+                     addUsedChip(data.word, true);
+                }
+                if (data.scores) updateLiveScores(data.scores);
+            });
 
-            socket.on('round_won', data => {
+            socket.on('round_complete', data => {
                 clearRoundTimer();
                 setCheckingState(false);
-                showFeedback(`🏆 ${data.winnerName} got it with "${data.word}"! +${data.points} pts`, 'info');
+                let msg = "⏰ Round complete!";
+                if (data.submissions && data.submissions.length > 0) {
+                     const winner = data.submissions[0];
+                     msg = `🏆 ${winner.name} was fastest with "${winner.word}"!`;
+                }
+                if (data.hint) msg += `<br><span style="font-size:0.9rem;opacity:0.9">💡 Possible answer: <b>${data.hint}</b></span>`;
+                showFeedback(msg, 'info', true); // ensure HTML is parsed if showFeedback supports it
                 if (data.scores) updateLiveScores(data.scores);
                 disableInput();
             });
 
-            socket.on('round_timeout', () => {
+            socket.on('round_timeout', data => {
                 clearRoundTimer();
                 setCheckingState(false);
-                showFeedback("⏰ Time's up!", 'wrong');
+                let msg = data && data.limitlessFinish ? "⏰ Round's up!" : "⏰ Time's up!";
+                if (data && data.hint) msg += `<br><span style="font-size:0.9rem;opacity:0.9">💡 Possible answer: <b>${data.hint}</b></span>`;
+                showFeedback(msg, 'wrong', true);
                 disableInput();
             });
 
@@ -1526,23 +1873,60 @@
         function createRoom() {
             const name = document.getElementById('createName').value.trim();
             const rounds = parseInt(document.getElementById('totalRounds').value);
+            const mode = document.getElementById('gameMode').value;
+            const time = parseInt(document.getElementById('timeLimit').value);
+            const maxP = parseInt(document.getElementById('maxPlayers').value);
+            const avatar = document.getElementById('avValCreate').value;
+            
             if (!name) { setStatus('createStatus', 'Please enter your name', 'error'); return; }
             myName = name;
+            myAvatar = avatar;
+            localStorage.setItem('playerName', name);
             initSocket();
             socket.emit('create_room', {
                 playerName: name,
-                totalRounds: isNaN(rounds) ? 10 : Math.min(Math.max(rounds, 1), 30)
+                avatar: avatar,
+                totalRounds: isNaN(rounds) ? 10 : Math.min(Math.max(rounds, 1), 30),
+                gameMode: mode,
+                timeLimit: isNaN(time) ? 15 : Math.max(time, 5),
+                maxPlayers: isNaN(maxP) ? 6 : Math.max(maxP, 2)
+            });
+        }
+
+        function createSoloRoom() {
+            const name = document.getElementById('soloName').value.trim();
+            const rounds = parseInt(document.getElementById('soloRounds').value);
+            const mode = document.getElementById('soloMode').value;
+            const time = parseInt(document.getElementById('soloTimeLimit').value);
+            const avatar = document.getElementById('avValSolo').value;
+            
+            if (!name) { setStatus('soloStatus', 'Please enter your name', 'error'); return; }
+            myName = name;
+            myAvatar = avatar;
+            localStorage.setItem('playerName', name);
+            initSocket();
+            socket.emit('create_room', {
+                playerName: name,
+                avatar: avatar,
+                totalRounds: isNaN(rounds) ? 10 : Math.min(Math.max(rounds, 1), 30),
+                isSinglePlayer: true,
+                gameMode: mode,
+                timeLimit: isNaN(time) ? 15 : Math.max(time, 5),
+                maxPlayers: 1
             });
         }
 
         function joinRoom() {
             const code = document.getElementById('joinRoomCode').value.trim().toUpperCase();
             const name = document.getElementById('joinName').value.trim();
+            const avatar = document.getElementById('avValJoin').value;
             if (!code) { setStatus('joinStatus', 'Please enter a room code', 'error'); return; }
             if (!name) { setStatus('joinStatus', 'Please enter your name', 'error'); return; }
             myName = name;
+            myAvatar = avatar;
+            localStorage.setItem('playerName', name);
             initSocket();
-            socket.emit('join_room', { roomId: code, playerName: name });
+            socket.emit('join_room', { roomId: code, playerName: name, avatar: avatar });
         }
 
         function hostStartGame() {
@@ -1603,24 +1987,38 @@
 
         function startRoundTimer(seconds) {
             clearRoundTimer();
-            let timeLeft = seconds;
             const bar = document.getElementById('timerBar');
             const num = document.getElementById('timerNum');
+            const startTime = performance.now();
+            const duration = seconds * 1000;
 
-            const tick = () => {
-                num.textContent = timeLeft;
-                const pct = (timeLeft / seconds) * 100;
+            bar.style.width = '100%';
+            bar.className = 'timer-fill';
+            num.textContent = seconds;
+
+            const animate = (now) => {
+                const elapsed = now - startTime;
+                const remaining = Math.max(0, duration - elapsed);
+                const pct = (remaining / duration) * 100;
+                const secsLeft = Math.ceil(remaining / 1000);
+
+                num.textContent = secsLeft;
                 bar.style.width = pct + '%';
                 bar.className = 'timer-fill' + (pct <= 30 ? ' danger' : pct <= 60 ? ' warning' : '');
-                if (timeLeft <= 0) { clearRoundTimer(); return; }
-                timeLeft--;
-                roundTimer = setTimeout(tick, 1000);
+
+                if (remaining <= 0) {
+                    bar.style.width = '0%';
+                    num.textContent = '0';
+                    roundTimer = null;
+                    return;
+                }
+                roundTimer = requestAnimationFrame(animate);
             };
-            tick();
+            roundTimer = requestAnimationFrame(animate);
         }
 
         function clearRoundTimer() {
-            if (roundTimer) { clearTimeout(roundTimer); roundTimer = null; }
+            if (roundTimer) { cancelAnimationFrame(roundTimer); roundTimer = null; }
         }
 
         function enableInput() {
@@ -1669,6 +2067,9 @@
         // ═══════════════════════════════════════════════════════
         function updateLiveScores(scores) {
             const sorted = [...scores].sort((a, b) => b.score - a.score);
+            const myServerScore = scores.find(p => p.id === myId)?.score || 0;
+            myScore = myServerScore;
+            document.getElementById('scoreDisplay').textContent = myScore;
             document.getElementById('liveScoresList').innerHTML = sorted.map((p, i) => `
                 <div class="player-row ${p.id === myId ? 'me' : ''}">
                     <span class="player-name">
@@ -1700,18 +2101,35 @@
             const pct = finalScore / (totalRoundsCount * 100);
             document.getElementById('starRating').textContent = pct >= 0.8 ? '⭐⭐⭐' : pct >= 0.5 ? '⭐⭐' : '⭐';
 
-            if (data.scores && data.scores.length > 1) {
+            if (data.scores && data.scores.length >= 1) {
                 document.getElementById('finalScoreboard').style.display = 'block';
                 const sorted = [...data.scores].sort((a, b) => b.score - a.score);
                 document.getElementById('finalScoresList').innerHTML = sorted.map((p, i) => `
-                    <div class="player-row ${p.id === myId ? 'me' : ''} ${i === 0 ? 'winner-row' : ''}">
+                    <div class="player-row ${p.id === myId ? 'me' : ''} ${i === 0 && p.score > 0 ? 'winner-row' : ''}">
                         <span class="player-name">
-                            ${i === 0 ? '🏆 ' : `${i + 1}. `}${p.name}
+                            ${i === 0 && p.score > 0 ? '🏆 ' : `${i + 1}. `}${p.name}
                             ${p.id === myId ? '<span class="badge badge-you">You</span>' : ''}
                         </span>
                         <span class="player-score">${p.score}</span>
                     </div>
                 `).join('');
+                
+                // Also display player history if available
+                if (data.playerHistory) {
+                    let hHtml = '';
+                    for (const pid of Object.keys(data.playerHistory)) {
+                        const words = data.playerHistory[pid] || [];
+                        const pData = data.scores.find(s => s.id === pid);
+                        if (pData && words.length > 0) {
+                            hHtml += `<div style="margin-bottom: 8px;"><strong>${pData.name}:</strong> ${words.map(w => `<span class="used-chip">${w.toUpperCase()}</span>`).join(' ')}</div>`;
+                        }
+                    }
+                    if (hHtml) {
+                        document.getElementById('playerHistoryList').innerHTML = hHtml;
+                    } else {
+                        document.getElementById('playerHistoryList').innerHTML = '<em>None</em>';
+                    }
+                }
             }
 
             if (data.hint) {
@@ -1728,7 +2146,10 @@
         function playAgain() {
             if (isHost && socket && currentRoomId) {
                 socket.emit('host_start', { roomId: currentRoomId });
-                showScreen('gameScreen');
+            } else if (!isHost && socket && currentRoomId) {
+                showScreen('waitingScreen');
+                setStatus('waitingMsg', 'Waiting for host to restart');
+                document.getElementById('startHint').textContent = 'Waiting for host to play again...';
             } else {
                 goToLobby();
             }
@@ -1744,6 +2165,25 @@
             document.getElementById('hintBox').style.display = 'none';
             document.getElementById('liveScoreboard').style.display = 'none';
             showScreen('lobbyScreen');
+        }
+
+        function setStatus(id, msg, type = '') {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = msg;
+                el.className = 'status-msg ' + type;
+            }
+        }
+        
+        let feedbackTimer = null;
+        function showFeedback(msg, type = '', isHtml = false) {
+            const el = document.getElementById('feedback');
+            if (!el) return;
+            if (isHtml) el.innerHTML = msg; else el.textContent = msg;
+            el.className = 'feedback ' + type;
+            el.classList.add('show');
+            clearTimeout(feedbackTimer);
+            feedbackTimer = setTimeout(() => el.classList.remove('show'), 3500);
         }
 
     </script>

@@ -1,4 +1,4 @@
-const { WORD_LIST, pairAnswers, VALID_PAIRS, EASY_PAIRS, MEDIUM_PAIRS, HARD_PAIRS } = require('./wordList');
+const { WORD_LIST, pairAnswers, VALID_PAIRS, LEVEL_PAIRS } = require('./wordList');
 
 // ═══════════════════════════════════════════════════════════════
 //  CONSTANTS
@@ -38,40 +38,38 @@ function generateRoomCode() {
 // Returns points based on word length
 function getWordPoints(word) {
     const len = word.length;
-    if (len >= 10) return 25;
-    if (len >= 8) return 20;
-    if (len >= 6) return 15;
-    return 10;
+    if (len <= 4) return 5;
+    if (len === 5) return 7;
+    if (len === 6) return 9;
+    if (len === 7) return 11;
+    if (len === 8) return 13;
+    return 15; // max at 9 or more
 }
 
-// Determine difficulty tier based on current round number
+// Determine difficulty level 1-5
 function getDifficultyTier() {
     const rand = Math.random() * 100;
-    if (rand < 80) return 'easy';
-    if (rand < 95) return 'medium';
-    return 'hard';
+    if (rand < 30) return 1; // 30% level 1
+    if (rand < 60) return 2; // 30% level 2
+    if (rand < 80) return 3; // 20% level 3
+    if (rand < 93) return 4; // 13% level 4
+    return 5; // 7% level 5
 }
 
 // Pick a fresh pair from the appropriate difficulty tier
 function pickFreshPairByTier(usedPairs, tier) {
-    const tierMap = {
-        easy: EASY_PAIRS,
-        medium: MEDIUM_PAIRS,
-        hard: HARD_PAIRS,
-    };
-
-    // Try the intended tier first, then fall back to others if exhausted
-    const order = tier === 'easy'
-        ? ['easy', 'medium', 'hard']
-        : tier === 'medium'
-            ? ['medium', 'easy', 'hard']
-            : ['hard', 'medium', 'easy'];
-
-    for (const t of order) {
-        const available = tierMap[t].filter(p => !usedPairs.has(p));
-        if (available.length > 0) {
-            return available[Math.floor(Math.random() * available.length)];
-        }
+    const list = LEVEL_PAIRS[tier] || LEVEL_PAIRS[1];
+    
+    // We try multiple times to find an unused one efficiently using loop
+    for (let i = 0; i < 100; i++) {
+        const pair = list[Math.floor(Math.random() * list.length)];
+        if (!usedPairs.has(pair)) return pair;
+    }
+    
+    // Fallback: full dictionary
+    const available = VALID_PAIRS.filter(p => !usedPairs.has(p));
+    if (available.length > 0) {
+        return available[Math.floor(Math.random() * available.length)];
     }
 
     // Absolute fallback — reuse any pair
@@ -90,14 +88,19 @@ function getHint(pairKey, usedWords) {
 //  ROOM MANAGEMENT
 // ═══════════════════════════════════════════════════════════════
 
-function createRoom(hostId, hostName, totalRounds = 10) {
+function createRoom(hostId, hostName, totalRounds = 10, isSinglePlayer = false, gameMode = 'single', timeLimit = 15, maxPlayers = 6, avatar = '🦊') {
     const roomId = generateRoomCode();
     rooms[roomId] = {
         id: roomId,
         hostId: hostId,
+        isSinglePlayer: isSinglePlayer,
+        gameMode: gameMode,
+        timeLimit: parseInt(timeLimit) || 15,
+        maxPlayers: parseInt(maxPlayers) || 6,
         players: [{
             id: hostId,
             name: hostName,
+            avatar: avatar,
             score: 0,
             ready: false,
             active: true
@@ -105,25 +108,26 @@ function createRoom(hostId, hostName, totalRounds = 10) {
         state: 'lobby',
         currentPair: null,
         currentPairKey: null,
-        roundWon: false,
         roundNumber: 0,
         totalRounds: totalRounds,
         usedPairs: new Set(),
         usedWordsThisRound: new Set(),
+        singleSubmissions: [],
+        playerHistory: {},
         timerRef: null,
         timerStart: null,
     };
     return roomId;
 }
 
-function joinRoom(roomId, playerId, playerName) {
+function joinRoom(roomId, playerId, playerName, avatar = '🦊') {
     const room = rooms[roomId];
 
     if (!room)
         return { error: 'ROOM NOT FOUND!' };
     if (room.state !== 'lobby')
         return { error: 'GAME ALREADY IN PROGRESS!' };
-    if (room.players.length >= MAX_PLAYERS)
+    if (room.players.length >= room.maxPlayers)
         return { error: 'ROOM IS FULL!' };
     if (room.players.find(p => p.name.toUpperCase() === playerName.toUpperCase()))
         return { error: 'NAME ALREADY TAKEN IN THIS ROOM!' };
@@ -131,6 +135,7 @@ function joinRoom(roomId, playerId, playerName) {
     room.players.push({
         id: playerId,
         name: playerName,
+        avatar: avatar,
         score: 0,
         ready: false,
         active: true
@@ -171,11 +176,16 @@ function getRoomSafely(roomId) {
     return {
         id: room.id,
         hostId: room.hostId,
+        isSinglePlayer: room.isSinglePlayer,
+        gameMode: room.gameMode,
+        timeLimit: room.timeLimit,
+        maxPlayers: room.maxPlayers,
         players: room.players,
         state: room.state,
         currentPair: room.currentPair,
         roundNumber: room.roundNumber,
         totalRounds: room.totalRounds,
+        playerHistory: room.playerHistory || {}
     };
 }
 
@@ -190,7 +200,7 @@ function canStartGame(roomId, requesterId) {
     if (room.state !== 'lobby') return { error: 'GAME ALREADY STARTED!' };
 
     const activePlayers = room.players.filter(p => p.active);
-    if (activePlayers.length < MIN_PLAYERS)
+    if (!room.isSinglePlayer && activePlayers.length < MIN_PLAYERS)
         return { error: `NEED AT LEAST ${MIN_PLAYERS} PLAYERS TO START!` };
 
     return { success: true };
@@ -208,8 +218,9 @@ function advanceRound(roomId) {
     const room = rooms[roomId];
 
     room.roundNumber++;
-    room.roundWon = false;
     room.usedWordsThisRound = new Set();
+    room.singleSubmissions = [];
+    room.players.forEach(p => { p.hasAnswered = false; });
     room.state = 'playing';
 
     const tier = getDifficultyTier();
@@ -226,7 +237,7 @@ function advanceRound(roomId) {
         roundNumber: room.roundNumber,
         totalRounds: room.totalRounds,
         pair: room.currentPair,
-        timeLimit: ROUND_TIME,
+        timeLimit: room.timeLimit || 15,
         difficulty: tier,
     };
 }
@@ -237,50 +248,62 @@ function advanceRound(roomId) {
 function submitWord(roomId, playerId, word) {
     const room = rooms[roomId];
 
-    if (!room)
-        return { error: 'ROOM NOT FOUND!' };
-    if (room.state !== 'playing')
-        return { error: 'NO ACTIVE ROUND!' };
-    if (room.roundWon)
-        return { error: 'ROUND ALREADY WON!' };
+    if (!room) return { error: 'ROOM NOT FOUND!' };
+    if (room.state !== 'playing') return { error: 'NO ACTIVE ROUND!' };
 
     const player = room.players.find(p => p.id === playerId);
-    if (!player || !player.active)
-        return { error: 'PLAYER NOT IN ROOM!' };
+    if (!player || !player.active) return { error: 'PLAYER NOT IN ROOM!' };
 
     const w = word.toLowerCase().trim();
 
     // ── Validation ──────────────────────────────────────────────
-    if (w.length <= 3)
-        return { invalid: 'WORD MUST BE MORE THAN 3 LETTERS!' };
-
-    if (w[0] !== room.currentPair.start.toLowerCase())
-        return { invalid: `MUST START WITH "${room.currentPair.start}"!` };
-
-    if (w[w.length - 1] !== room.currentPair.end.toLowerCase())
-        return { invalid: `MUST END WITH "${room.currentPair.end}"!` };
-
-    if (room.usedWordsThisRound.has(w))
-        return { invalid: `"${w.toUpperCase()}" ALREADY USED THIS ROUND!` };
-
-    if (!WORD_LIST.has(w))
-        return { invalid: `"${w.toUpperCase()}" NOT IN WORD LIST!` };
-
-    // ── Valid & first! ───────────────────────────────────────────
-    room.roundWon = true;
-    room.usedWordsThisRound.add(w);
+    if (w.length <= 3) return { invalid: 'WORD MUST BE MORE THAN 3 LETTERS!' };
+    if (w[0] !== room.currentPair.start.toLowerCase()) return { invalid: `MUST START WITH "${room.currentPair.start}"!` };
+    if (w[w.length - 1] !== room.currentPair.end.toLowerCase()) return { invalid: `MUST END WITH "${room.currentPair.end}"!` };
+    if (room.usedWordsThisRound.has(w)) return { invalid: `"${w.toUpperCase()}" ALREADY USED THIS ROUND!` };
+    if (!WORD_LIST.has(w)) return { invalid: `"${w.toUpperCase()}" NOT IN WORD LIST!` };
 
     const pointsAwarded = getWordPoints(w);
-    player.score += pointsAwarded;
+    room.usedWordsThisRound.add(w);
 
-    return {
-        won: true,
-        winnerId: playerId,
-        winnerName: player.name,
-        word: w.toUpperCase(),
-        pointsAwarded: pointsAwarded,
-        scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score })),
-    };
+    if (!room.playerHistory[playerId]) room.playerHistory[playerId] = [];
+    room.playerHistory[playerId].push(w);
+
+    if (room.gameMode === 'limitless') {
+        player.score += pointsAwarded;
+        return {
+            limitlessValid: true,
+            playerId: playerId,
+            word: w.toUpperCase(),
+            pointsAwarded: pointsAwarded,
+            scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score, avatar: p.avatar }))
+        };
+    } else if (room.gameMode === 'normal') {
+        room.state = 'between';
+        player.score += pointsAwarded;
+        return {
+            normalWin: true,
+            winnerId: playerId,
+            winnerName: player.name,
+            word: w.toUpperCase(),
+            pointsAwarded: pointsAwarded,
+            hint: getHint(room.currentPairKey, room.usedWordsThisRound),
+            scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score, avatar: p.avatar }))
+        };
+    } else {
+        // Single Word Time Based
+        if (player.hasAnswered) return { invalid: 'YOU ALREADY SUBMITTED A WORD THIS ROUND!' };
+        player.hasAnswered = true;
+        
+        room.singleSubmissions.push({ playerId, word: w, points: pointsAwarded, time: Date.now() });
+
+        const activePlayers = room.players.filter(p => p.active);
+        if (room.singleSubmissions.length >= activePlayers.length) {
+             return evaluateSingleRound(roomId);
+        }
+
+        return { waitingForOthers: true, word: w.toUpperCase(), playerId: playerId };
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -290,15 +313,53 @@ function handleRoundTimeout(roomId) {
     const room = rooms[roomId];
     if (!room || room.state !== 'playing') return null;
 
+    if (room.gameMode === 'limitless') {
+        room.state = 'between';
+        return {
+            limitlessFinish: true,
+            pair: room.currentPair,
+            hint: getHint(room.currentPairKey, room.usedWordsThisRound),
+            scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score, avatar: p.avatar }))
+        };
+    } else if (room.gameMode === 'normal') {
+        room.state = 'between';
+        return {
+            timeoutNormal: true,
+            pair: room.currentPair,
+            hint: getHint(room.currentPairKey, room.usedWordsThisRound),
+            scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score, avatar: p.avatar }))
+        };
+    } else {
+        return evaluateSingleRound(roomId);
+    }
+}
+
+function evaluateSingleRound(roomId) {
+    const room = rooms[roomId];
+    if (!room) return null;
     room.state = 'between';
+
+    room.singleSubmissions.sort((a, b) => a.time - b.time);
+    const subResult = [];
+    const n = room.singleSubmissions.length;
+    room.singleSubmissions.forEach((sub, idx) => {
+        const player = room.players.find(p => p.id === sub.playerId);
+        if (player) {
+            const speedBonus = (n - idx - 1) * 3;
+            const totalPts = sub.points + speedBonus;
+            player.score += totalPts;
+            subResult.push({ id: player.id, name: player.name, word: sub.word.toUpperCase(), pts: totalPts, speedBonus });
+        }
+    });
 
     const hint = getHint(room.currentPairKey, room.usedWordsThisRound);
 
     return {
-        timedOut: true,
+        singleRoundComplete: true,
+        submissions: subResult,
         pair: room.currentPair,
         hint: hint,
-        scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score })),
+        scores: room.players.map(p => ({ id: p.id, name: p.name, score: p.score, avatar: p.avatar }))
     };
 }
 
@@ -321,6 +382,7 @@ function getFinalResults(roomId) {
     return {
         players: sorted,
         winner: sorted[0],
+        playerHistory: room.playerHistory
     };
 }
 
